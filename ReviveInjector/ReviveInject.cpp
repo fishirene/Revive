@@ -80,6 +80,10 @@ int CreateProcessAndInject(wchar_t *programPath) {
 		ResumeThread(pi.hThread);
 		return -1;
 	}
+	/*if (!InjectLibRevive(pi.hProcess)) {
+		ResumeThread(pi.hThread);
+		return -1;
+	}*/
 
 	LOG("Injected dlls successfully\n");
 	ResumeThread(pi.hThread);
@@ -100,6 +104,10 @@ int OpenProcessAndInject(wchar_t *processId) {
 		!InjectLibRevive(hProcess)) {
 		return -1;
 	}
+
+	/*if (!InjectLibRevive(hProcess)) {
+		return -1;
+	}*/
 
 	LOG("Injected dlls succesfully\n");
 	return 0;

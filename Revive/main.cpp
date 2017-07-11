@@ -7,7 +7,7 @@
 #include <openvr.h>
 #include <string>
 
-#include "Extras\OVR_CAPI_Util.h"
+#include "OVR_CAPI_Util.h"
 #include "OVR_Version.h"
 
 typedef HMODULE(__stdcall* _LoadLibrary)(LPCWSTR lpFileName);

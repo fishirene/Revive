@@ -215,51 +215,22 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\microprofile\microprofile.h" />
-    <ClInclude Include="..\microprofile\microprofiledraw.h" />
-    <ClInclude Include="..\microprofile\microprofilehtml.h" />
-    <ClInclude Include="..\microprofile\microprofileui.h" />
-    <ClInclude Include="..\openvr\headers\openvr.h" />
-    <ClInclude Include="CompositorBase.h" />
-    <ClInclude Include="CompositorD3D.h" />
-    <ClInclude Include="CompositorGL.h" />
-    <ClInclude Include="HapticsBuffer.h" />
+    <ClInclude Include="..\LibOVR\Include\OVR_CAPI_Keys.h" />
+    <ClInclude Include="..\LibOVR\Include\OVR_CAPI_Util.h" />
     <ClInclude Include="REV_Math.h" />
-    <ClInclude Include="SessionDetails.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Session.h" />
     <ClInclude Include="..\LibOVR\Include\Extras\OVR_Math.h" />
     <ClInclude Include="..\LibOVR\Include\OVR_CAPI.h" />
-    <ClInclude Include="..\LibOVR\Include\OVR_CAPI_Audio.h" />
-    <ClInclude Include="..\LibOVR\Include\OVR_CAPI_D3D.h" />
-    <ClInclude Include="..\LibOVR\Include\OVR_CAPI_GL.h" />
-    <ClInclude Include="..\LibOVR\Include\OVR_CAPI_Keys.h" />
     <ClInclude Include="..\LibOVR\Include\OVR_ErrorCode.h" />
     <ClInclude Include="..\LibOVR\Include\OVR_Version.h" />
-    <ClInclude Include="Assert.h" />
-    <ClInclude Include="Error.h" />
     <ClInclude Include="Settings.h" />
-    <ClInclude Include="TextureBase.h" />
-    <ClInclude Include="TextureD3D.h" />
-    <ClInclude Include="TextureGL.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="CompositorBase.cpp" />
-    <ClCompile Include="CompositorD3D.cpp" />
-    <ClCompile Include="CompositorGL.cpp" />
-    <ClCompile Include="HapticsBuffer.cpp" />
-    <ClCompile Include="SessionDetails.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="microprofile.cpp" />
     <ClCompile Include="REV_CAPI.cpp" />
-    <ClCompile Include="REV_CAPI_Audio.cpp" />
-    <ClCompile Include="REV_CAPI_D3D.cpp" />
-    <ClCompile Include="REV_CAPI_GL.cpp" />
     <ClCompile Include="Session.cpp" />
-    <ClCompile Include="TextureBase.cpp" />
-    <ClCompile Include="TextureD3D.cpp" />
-    <ClCompile Include="TextureGL.cpp" />
     <ClCompile Include="xinput.cpp" />
   </ItemGroup>
   <ItemGroup>

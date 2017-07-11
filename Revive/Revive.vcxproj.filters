@@ -25,27 +25,9 @@
     <Filter Include="Source Files\LibOVR">
       <UniqueIdentifier>{a809efad-2f20-49f9-b190-86668467211b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\microprofile">
-      <UniqueIdentifier>{75f22e69-5dfc-45d2-830f-4a73125cadaa}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\microprofile">
-      <UniqueIdentifier>{1e9acdab-ebce-4152-81ab-53815bbac024}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\LibOVR\Include\OVR_CAPI.h">
-      <Filter>Header Files\LibOVR</Filter>
-    </ClInclude>
-    <ClInclude Include="..\LibOVR\Include\OVR_CAPI_Audio.h">
-      <Filter>Header Files\LibOVR</Filter>
-    </ClInclude>
-    <ClInclude Include="..\LibOVR\Include\OVR_CAPI_D3D.h">
-      <Filter>Header Files\LibOVR</Filter>
-    </ClInclude>
-    <ClInclude Include="..\LibOVR\Include\OVR_CAPI_GL.h">
-      <Filter>Header Files\LibOVR</Filter>
-    </ClInclude>
-    <ClInclude Include="..\LibOVR\Include\OVR_CAPI_Keys.h">
       <Filter>Header Files\LibOVR</Filter>
     </ClInclude>
     <ClInclude Include="..\LibOVR\Include\OVR_ErrorCode.h">
@@ -54,55 +36,10 @@
     <ClInclude Include="..\LibOVR\Include\OVR_Version.h">
       <Filter>Header Files\LibOVR</Filter>
     </ClInclude>
-    <ClInclude Include="..\openvr\headers\openvr.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Assert.h">
-      <Filter>Header Files\LibRevive</Filter>
-    </ClInclude>
-    <ClInclude Include="Error.h">
-      <Filter>Header Files\LibRevive</Filter>
-    </ClInclude>
-    <ClInclude Include="CompositorBase.h">
-      <Filter>Header Files\LibRevive</Filter>
-    </ClInclude>
-    <ClInclude Include="CompositorD3D.h">
-      <Filter>Header Files\LibRevive</Filter>
-    </ClInclude>
-    <ClInclude Include="CompositorGL.h">
-      <Filter>Header Files\LibRevive</Filter>
-    </ClInclude>
     <ClInclude Include="InputManager.h">
       <Filter>Header Files\LibRevive</Filter>
     </ClInclude>
-    <ClInclude Include="TextureBase.h">
-      <Filter>Header Files\LibRevive</Filter>
-    </ClInclude>
-    <ClInclude Include="TextureD3D.h">
-      <Filter>Header Files\LibRevive</Filter>
-    </ClInclude>
-    <ClInclude Include="TextureGL.h">
-      <Filter>Header Files\LibRevive</Filter>
-    </ClInclude>
     <ClInclude Include="Settings.h">
-      <Filter>Header Files\LibRevive</Filter>
-    </ClInclude>
-    <ClInclude Include="..\microprofile\microprofile.h">
-      <Filter>Header Files\microprofile</Filter>
-    </ClInclude>
-    <ClInclude Include="..\microprofile\microprofiledraw.h">
-      <Filter>Header Files\microprofile</Filter>
-    </ClInclude>
-    <ClInclude Include="..\microprofile\microprofilehtml.h">
-      <Filter>Header Files\microprofile</Filter>
-    </ClInclude>
-    <ClInclude Include="..\microprofile\microprofileui.h">
-      <Filter>Header Files\microprofile</Filter>
-    </ClInclude>
-    <ClInclude Include="SessionDetails.h">
-      <Filter>Header Files\LibRevive</Filter>
-    </ClInclude>
-    <ClInclude Include="HapticsBuffer.h">
       <Filter>Header Files\LibRevive</Filter>
     </ClInclude>
     <ClInclude Include="Session.h">
@@ -114,6 +51,12 @@
     <ClInclude Include="REV_Math.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\LibOVR\Include\OVR_CAPI_Keys.h">
+      <Filter>Header Files\LibOVR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LibOVR\Include\OVR_CAPI_Util.h">
+      <Filter>Header Files\LibOVR</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -122,47 +65,11 @@
     <ClCompile Include="REV_CAPI.cpp">
       <Filter>Source Files\LibOVR</Filter>
     </ClCompile>
-    <ClCompile Include="REV_CAPI_Audio.cpp">
-      <Filter>Source Files\LibOVR</Filter>
-    </ClCompile>
-    <ClCompile Include="REV_CAPI_D3D.cpp">
-      <Filter>Source Files\LibOVR</Filter>
-    </ClCompile>
-    <ClCompile Include="REV_CAPI_GL.cpp">
-      <Filter>Source Files\LibOVR</Filter>
-    </ClCompile>
-    <ClCompile Include="CompositorBase.cpp">
-      <Filter>Source Files\LibRevive</Filter>
-    </ClCompile>
-    <ClCompile Include="CompositorGL.cpp">
-      <Filter>Source Files\LibRevive</Filter>
-    </ClCompile>
-    <ClCompile Include="CompositorD3D.cpp">
-      <Filter>Source Files\LibRevive</Filter>
-    </ClCompile>
     <ClCompile Include="InputManager.cpp">
-      <Filter>Source Files\LibRevive</Filter>
-    </ClCompile>
-    <ClCompile Include="TextureGL.cpp">
-      <Filter>Source Files\LibRevive</Filter>
-    </ClCompile>
-    <ClCompile Include="TextureD3D.cpp">
       <Filter>Source Files\LibRevive</Filter>
     </ClCompile>
     <ClCompile Include="xinput.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="microprofile.cpp">
-      <Filter>Source Files\microprofile</Filter>
-    </ClCompile>
-    <ClCompile Include="SessionDetails.cpp">
-      <Filter>Source Files\LibRevive</Filter>
-    </ClCompile>
-    <ClCompile Include="HapticsBuffer.cpp">
-      <Filter>Source Files\LibRevive</Filter>
-    </ClCompile>
-    <ClCompile Include="TextureBase.cpp">
-      <Filter>Source Files\LibRevive</Filter>
     </ClCompile>
     <ClCompile Include="Session.cpp">
       <Filter>Source Files\LibRevive</Filter>

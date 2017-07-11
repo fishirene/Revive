@@ -1,6 +1,5 @@
 #pragma once
 
-#include "HapticsBuffer.h"
 #include "OVR_CAPI.h"
 #include "Extras/OVR_Math.h"
 
@@ -9,113 +8,83 @@
 #include <vector>
 #include <Windows.h>
 #include <Xinput.h>
+#include "Settings.h"
 
 class InputManager
 {
 public:
-	class InputDevice
+	class OculusTouch
 	{
 	public:
-		virtual ~InputDevice() { }
+		OculusTouch(ovrControllerType role);
+		virtual ~OculusTouch() { }
 
-		// Input
-		virtual vr::ETrackedControllerRole GetRole() { return vr::TrackedControllerRole_Invalid; }
-		virtual ovrControllerType GetType() = 0;
-		virtual bool IsConnected() = 0;
-		virtual bool GetInputState(ovrSession session, ovrInputState* inputState) = 0;
+		ovrControllerType ControllerType;
 
-		// Haptics
-		virtual void SetVibration(float frequency, float amplitude) { }
-		virtual void SubmitVibration(const ovrHapticsBuffer* buffer) { }
-		virtual void GetVibrationState(ovrHapticsPlaybackState* outState) { }
-	};
-
-	class OculusTouch : public InputDevice
-	{
-	public:
-		OculusTouch(vr::ETrackedControllerRole role);
-		virtual ~OculusTouch();
-
-		static const vr::EVRButtonId k_EButton_B = (vr::EVRButtonId)8;
-		HapticsBuffer m_Haptics;
-
-		virtual vr::ETrackedControllerRole GetRole() { return m_Role; }
-		virtual ovrControllerType GetType();
-		virtual bool IsConnected();
-		virtual bool GetInputState(ovrSession session, ovrInputState* inputState);
-		virtual void SetVibration(float frequency, float amplitude) { m_Haptics.SetConstant(frequency, amplitude); }
-		virtual void SubmitVibration(const ovrHapticsBuffer* buffer) { m_Haptics.AddSamples(buffer); }
-		virtual void GetVibrationState(ovrHapticsPlaybackState* outState) { *outState = m_Haptics.GetState(); }
+		unsigned int GetStatusFlag();
+		ovrPoseStatef GetPose(double absTime);
+		bool GetInputState(ovrSession session, ovrInputState* inputState);
+		void EmulateTouchPositionOffset(float x, float y);
+		void EmulateTouchOrientationOffset(float x, float y, float z, float w);
+		void EmulateTouchInputState();
 
 	private:
-		bool m_bHapticsRunning;
-		vr::ETrackedControllerRole m_Role;
-		vr::VRControllerState_t m_LastState;
+		ovrTrackedDeviceType m_TrackedDeviceType;
+		ovrInputState m_LastState;
+		ovrPoseStatef m_LastPose;
+		ovrPoseStatef m_EmulatedOffset;
+		ovrVector3f m_HeadHandOffset;
+		
+		//bool m_StickTouched;
+		//OVR::Vector2f m_ThumbStick;		
+		
+		//void AddOffsetToOVRPose(ovrPoseStatef& pose);
 
-		bool m_StickTouched;
-		OVR::Vector2f m_ThumbStick;
-		ovrTouch AxisToTouch(vr::VRControllerAxis_t axis);
-
+		//ovrTouch AxisToTouch(vr::VRControllerAxis_t axis);
+		/*ovrButton m_TouchButtons;
 		bool m_Gripped;
-		double m_GrippedTime;
-		bool IsPressed(vr::VRControllerState_t newState, vr::EVRButtonId button);
-		bool IsReleased(vr::VRControllerState_t newState, vr::EVRButtonId button);
-
-		std::thread m_HapticsThread;
-		static void HapticsThread(OculusTouch* device);
+		double m_GrippedTime;*/
+		/*bool IsPressed(vr::VRControllerState_t newState, vr::EVRButtonId button);
+		bool IsReleased(vr::VRControllerState_t newState, vr::EVRButtonId button);*/
 	};
 
-	class OculusRemote : public InputDevice
-	{
-	public:
-		OculusRemote() { }
-		virtual ~OculusRemote() { }
+	//class XboxGamepad : public InputDevice
+	//{
+	//public:
+	//	XboxGamepad();
+	//	virtual ~XboxGamepad();
 
-		virtual ovrControllerType GetType() { return ovrControllerType_Remote; }
-		virtual bool IsConnected();
-		virtual bool GetInputState(ovrSession session, ovrInputState* inputState);
-	};
+	//	virtual ovrControllerType GetType() { return ovrControllerType_XBox; }
+	//	virtual bool IsConnected();
+	//	virtual bool GetInputState(ovrSession session, ovrInputState* inputState);
+	//	virtual void SetVibration(float frequency, float amplitude);
 
-	class XboxGamepad : public InputDevice
-	{
-	public:
-		XboxGamepad();
-		virtual ~XboxGamepad();
+	//private:
+	//	typedef DWORD(__stdcall* _XInputSetState)(DWORD dwUserIndex, XINPUT_VIBRATION* pVibration);
+	//	typedef DWORD(__stdcall* _XInputGetState)(DWORD dwUserIndex, XINPUT_STATE* pState);
 
-		virtual ovrControllerType GetType() { return ovrControllerType_XBox; }
-		virtual bool IsConnected();
-		virtual bool GetInputState(ovrSession session, ovrInputState* inputState);
-		virtual void SetVibration(float frequency, float amplitude);
-
-	private:
-		typedef DWORD(__stdcall* _XInputSetState)(DWORD dwUserIndex, XINPUT_VIBRATION* pVibration);
-		typedef DWORD(__stdcall* _XInputGetState)(DWORD dwUserIndex, XINPUT_STATE* pState);
-
-		HMODULE m_XInput;
-		_XInputSetState SetState;
-		_XInputGetState GetState;
-	};
+	//	HMODULE m_XInput;
+	//	_XInputSetState SetState;
+	//	_XInputGetState GetState;
+	//};
 
 	InputManager();
 	~InputManager();
 
+	//bool ConnectTouchs();
+	//bool DisconnectTouchs();
+	//bool IsConnected();
+
 	unsigned int GetConnectedControllerTypes();
-	ovrTouchHapticsDesc GetTouchHapticsDesc(ovrControllerType controllerType);
-
-	ovrResult SetControllerVibration(ovrControllerType controllerType, float frequency, float amplitude);
 	ovrResult GetInputState(ovrSession session, ovrControllerType controllerType, ovrInputState* inputState);
-	ovrResult SubmitControllerVibration(ovrControllerType controllerType, const ovrHapticsBuffer* buffer);
-	ovrResult GetControllerVibrationState(ovrControllerType controllerType, ovrHapticsPlaybackState* outState);
-
 	void GetTrackingState(ovrSession session, ovrTrackingState* outState, double absTime);
 	ovrResult GetDevicePoses(ovrTrackedDeviceType* deviceTypes, int deviceCount, double absTime, ovrPoseStatef* outDevicePoses);
+	void EmulateTouchsPositionOffset(ovrControllerType controllerType, float x, float y);
+	void EmulateTouchsOrientationOffset(ovrControllerType controllerType, float x, float y, float z, float w);
 
 protected:
-	std::vector<InputDevice*> m_InputDevices;
-
-private:
-	ovrPoseStatef m_LastPoses[vr::k_unMaxTrackedDeviceCount];
-	unsigned int TrackedDevicePoseToOVRStatusFlags(vr::TrackedDevicePose_t pose);
-	ovrPoseStatef TrackedDevicePoseToOVRPose(vr::TrackedDevicePose_t pose, ovrPoseStatef& lastPose, double time);
+	//std::vector<OculusTouch*> m_InputDevices;
+	OculusTouch* m_TouchL;
+	OculusTouch* m_TouchR;
 };
 

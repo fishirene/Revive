@@ -4,7 +4,6 @@
 #include "MinHook.h"
 #include "Shlwapi.h"
 
-#include <openvr.h>
 #include <string>
 
 #include "OVR_CAPI_Util.h"

@@ -5,7 +5,7 @@
 #include <Shlwapi.h>
 
 bool InjectLibRevive(HANDLE hProcess);
-bool InjectOpenVR(HANDLE hProcess);
+//bool InjectOpenVR(HANDLE hProcess);
 bool InjectDLL(HANDLE hProcess, const char *dllPath, int dllPathLength);
 
 int CreateProcessAndInject(wchar_t *programPath) {
@@ -75,15 +75,15 @@ int CreateProcessAndInject(wchar_t *programPath) {
 	}
 #endif
 
-	if (!InjectOpenVR(pi.hProcess) ||
+	/*if (!InjectOpenVR(pi.hProcess) ||
 		!InjectLibRevive(pi.hProcess)) {
 		ResumeThread(pi.hThread);
 		return -1;
-	}
-	/*if (!InjectLibRevive(pi.hProcess)) {
+	}*/
+	if (!InjectLibRevive(pi.hProcess)) {
 		ResumeThread(pi.hThread);
 		return -1;
-	}*/
+	}
 
 	LOG("Injected dlls successfully\n");
 	ResumeThread(pi.hThread);
@@ -100,14 +100,14 @@ int OpenProcessAndInject(wchar_t *processId) {
 		return -1;
 	}
 
-	if (!InjectOpenVR(hProcess) ||
+	/*if (!InjectOpenVR(hProcess) ||
 		!InjectLibRevive(hProcess)) {
 		return -1;
-	}
-
-	/*if (!InjectLibRevive(hProcess)) {
-		return -1;
 	}*/
+
+	if (!InjectLibRevive(hProcess)) {
+		return -1;
+	}
 
 	LOG("Injected dlls succesfully\n");
 	return 0;

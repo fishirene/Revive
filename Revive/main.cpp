@@ -1,63 +1,60 @@
 #include <Windows.h>
 #include <stdio.h>
 #include <dxgi.h>
-#include "MinHook.h"
-#include "Shlwapi.h"
-
+#include <Shlwapi.h>
+#include <Shlobj.h>
 #include <string>
 
+#include "MinHook.h"
 #include "OVR_CAPI_Util.h"
 #include "OVR_Version.h"
+#include "Utils.h"
 
-typedef HMODULE(__stdcall* _LoadLibrary)(LPCWSTR lpFileName);
-typedef HANDLE(__stdcall* _OpenEvent)(DWORD dwDesiredAccess, BOOL bInheritHandle, LPCWSTR lpName);
-typedef HRESULT(__stdcall* _CreateDXGIFactory)(REFIID riid, void **ppFactory);
+FILE* g_LogFileRevive = NULL;
 
-_LoadLibrary TrueLoadLibrary;
-_OpenEvent TrueOpenEvent;
-_CreateDXGIFactory DXGIFactory;
+typedef FARPROC(__stdcall* _GetProcAddress)(HMODULE hModule, LPCSTR lpProcName);
+
+_GetProcAddress TrueProcAddress;
+_GetTrackingState g_TrampolineFuncAddress;
 
 WCHAR revModuleName[MAX_PATH];
 WCHAR ovrModuleName[MAX_PATH];
 
-HRESULT WINAPI HookDXGIFactory(REFIID riid, void **ppFactory)
+FARPROC WINAPI HookProcAddress(HMODULE hModule, LPCSTR lpProcName)
 {
-	// We need shared texture support for OpenVR, so force DXGI 1.0 games to use DXGI 1.1
-	IDXGIFactory1* pDXGIFactory;
-	HRESULT hr = CreateDXGIFactory1(__uuidof(IDXGIFactory1), (void **)&pDXGIFactory);
-	if (FAILED(hr))
-		return hr;
-	return pDXGIFactory->QueryInterface(riid, ppFactory);
-}
-
-HANDLE WINAPI HookOpenEvent(DWORD dwDesiredAccess, BOOL bInheritHandle, LPCWSTR lpName)
-{
-	// Don't touch this, it heavily affects performance in Unity games.
-	if (wcscmp(lpName, OVR_HMD_CONNECTED_EVENT_NAME) == 0)
-		return ::CreateEventW(NULL, TRUE, TRUE, NULL);
-
-	return TrueOpenEvent(dwDesiredAccess, bInheritHandle, lpName);
-}
-
-HMODULE WINAPI HookLoadLibrary(LPCWSTR lpFileName)
-{
-	LPCWSTR name = PathFindFileNameW(lpFileName);
-	LPCWSTR ext = PathFindExtensionW(name);
-	size_t length = ext - name;
-
-	// Load our own library again so the ref count is incremented.
-	if (wcsncmp(name, ovrModuleName, length) == 0)
-		return TrueLoadLibrary(revModuleName);
-
-	// We've already injected OpenVR, block attempts to override it.
-	if (wcsncmp(name, L"openvr_api.dll", length) == 0)
-		return NULL;
-
-	return TrueLoadLibrary(lpFileName);
+	
+	if (strncmp(lpProcName, "ovr_GetTrackingState", MAX_PATH) == 0)
+	{
+		std::string revProcName = lpProcName;
+		revProcName.replace(0, 3, "rev");
+		g_TrampolineFuncAddress = reinterpret_cast<_GetTrackingState>(TrueProcAddress(hModule, lpProcName));
+		return TrueProcAddress(GetModuleHandle(revModuleName), revProcName.c_str());
+	}
+	if (strncmp(lpProcName, "ovr_GetInputState", MAX_PATH) == 0)
+	{
+		std::string revProcName = lpProcName;
+		revProcName.replace(0, 3, "rev");
+		return TrueProcAddress(GetModuleHandle(revModuleName), revProcName.c_str());
+	}
+	return TrueProcAddress(hModule, lpProcName);
 }
 
 BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
 {
+	WCHAR LogPath[MAX_PATH];
+	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, LogPath)))
+	{
+		wcsncat(LogPath, L"\\Revive", MAX_PATH);
+
+		BOOL exists = PathFileExists(LogPath);
+		if (!exists)
+			exists = CreateDirectory(LogPath, NULL);
+
+		wcsncat(LogPath, L"\\Revive.txt", MAX_PATH);
+		if (exists)
+			g_LogFileRevive = _wfopen(LogPath, L"w");
+	}	
+
 #if defined(_WIN64)
 	const char* pBitDepth = "64";
 #else
@@ -68,14 +65,20 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserve
 		case DLL_PROCESS_ATTACH:
 			GetModuleFileName((HMODULE)hModule, revModuleName, MAX_PATH);
 			swprintf(ovrModuleName, MAX_PATH, L"LibOVRRT%hs_%d.dll", pBitDepth, OVR_MAJOR_VERSION);
+
 			MH_Initialize();
-			MH_CreateHook(LoadLibraryW, HookLoadLibrary, (PVOID*)&TrueLoadLibrary);
-			MH_CreateHook(OpenEventW, HookOpenEvent, (PVOID*)&TrueOpenEvent);
-			MH_CreateHookApi(L"dxgi.dll", "CreateDXGIFactory", HookDXGIFactory, (PVOID*)&DXGIFactory);
-			MH_EnableHook(MH_ALL_HOOKS);
+			MH_CreateHook(GetProcAddress, HookProcAddress, reinterpret_cast<LPVOID*>(&TrueProcAddress));
+
+			MH_QueueEnableHook(GetProcAddress);
+			MH_ApplyQueued();
+
 			break;
 		case DLL_PROCESS_DETACH:
 			MH_Uninitialize();
+
+			MH_QueueDisableHook(GetProcAddress);
+			MH_ApplyQueued();
+
 			break;
 		default:
 			break;

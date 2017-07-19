@@ -5,7 +5,6 @@
 #include <Shlwapi.h>
 
 bool InjectLibRevive(HANDLE hProcess);
-//bool InjectOpenVR(HANDLE hProcess);
 bool InjectDLL(HANDLE hProcess, const char *dllPath, int dllPathLength);
 
 int CreateProcessAndInject(wchar_t *programPath) {
@@ -135,9 +134,9 @@ bool InjectLibRevive(HANDLE hProcess) {
 #endif
 }
 
-bool InjectOpenVR(HANDLE hProcess) {
-	return InjectDLL(hProcess, "openvr_api.dll");
-}
+//bool InjectOpenVR(HANDLE hProcess) {
+//	return InjectDLL(hProcess, "openvr_api.dll");
+//}
 
 bool InjectDLL(HANDLE hProcess, const char *dllPath, int dllPathLength)
 {

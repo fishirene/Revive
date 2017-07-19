@@ -2,18 +2,10 @@
 
 #include "OVR_CAPI.h"
 #include "Extras/OVR_Math.h"
-
 #include <thread>
 #include <vector>
 #include <Windows.h>
-#include "Settings.h"
-
-typedef enum ovrTouchSuppliment_ {
-	ovrTouch_LThumbstick = 0x00000080,
-	ovrTouch_RThumbstick = 0x00008000,
-	ovrTouch_LHandTrigger = 0x00010000,
-	ovrTouch_RHandTrigger = 0x00020000,
-} ovrTouchSuppliment;
+#include "Utils.h"
 
 class InputManager
 {
@@ -27,22 +19,18 @@ public:
 		ovrControllerType ControllerType;
 
 		unsigned int GetStatusFlag();
-		ovrPoseStatef GetPose(double absTime);
+		ovrPoseStatef GetOffset(double absTime);
 		void EmulateTouchPositionOffset(float x, float y);
 		void EmulateTouchOrientationOffset(float x, float y, float z, float w);
 
 	private:
-		ovrPoseStatef m_LastPose;
+		ovrPoseStatef m_LastOffset;
 		ovrPoseStatef m_EmulatedOffset;
-		ovrVector3f m_HeadHandOffset;	
+		ovrVector3f m_HeadHandPositionOffset;	
 	};
-
+	
 	InputManager();
 	~InputManager();
-
-	//bool ConnectTouchs();
-	//bool DisconnectTouchs();
-	//bool IsConnected();
 
 	unsigned int GetConnectedControllerTypes();
 	ovrResult GetInputState(ovrSession session, ovrControllerType controllerType, ovrInputState* inputState);

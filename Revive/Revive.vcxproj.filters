@@ -39,23 +39,17 @@
     <ClInclude Include="InputManager.h">
       <Filter>Header Files\LibRevive</Filter>
     </ClInclude>
-    <ClInclude Include="Settings.h">
-      <Filter>Header Files\LibRevive</Filter>
-    </ClInclude>
-    <ClInclude Include="Session.h">
-      <Filter>Header Files\LibRevive</Filter>
-    </ClInclude>
     <ClInclude Include="..\LibOVR\Include\Extras\OVR_Math.h">
       <Filter>Header Files\LibOVR</Filter>
-    </ClInclude>
-    <ClInclude Include="REV_Math.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\LibOVR\Include\OVR_CAPI_Keys.h">
       <Filter>Header Files\LibOVR</Filter>
     </ClInclude>
     <ClInclude Include="..\LibOVR\Include\OVR_CAPI_Util.h">
       <Filter>Header Files\LibOVR</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils.h">
+      <Filter>Header Files\LibRevive</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -66,9 +60,6 @@
       <Filter>Source Files\LibOVR</Filter>
     </ClCompile>
     <ClCompile Include="InputManager.cpp">
-      <Filter>Source Files\LibRevive</Filter>
-    </ClCompile>
-    <ClCompile Include="Session.cpp">
       <Filter>Source Files\LibRevive</Filter>
     </ClCompile>
   </ItemGroup>

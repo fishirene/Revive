@@ -1,4 +1,8 @@
 #pragma once
+#include <Windows.h>
+#include <stdio.h>
+#include <Shlwapi.h>
+#include <Shlobj.h>
 
 typedef ovrTrackingState(__cdecl* _GetTrackingState)(ovrSession session, double absTime, ovrBool latencyMarker);
 extern _GetTrackingState g_TrampolineFuncAddress;

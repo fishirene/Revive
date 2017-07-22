@@ -1,13 +1,14 @@
 #include <Windows.h>
 #include <stdio.h>
-#include <dxgi.h>
 #include <Shlwapi.h>
 #include <Shlobj.h>
 #include <string>
-
+ 
 #include "MinHook.h"
+
 #include "OVR_CAPI_Util.h"
 #include "OVR_Version.h"
+
 #include "Utils.h"
 
 FILE* g_LogFileRevive = NULL;
@@ -52,7 +53,7 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserve
 
 		wcsncat(LogPath, L"\\Revive.txt", MAX_PATH);
 		if (exists)
-			g_LogFileRevive = _wfopen(LogPath, L"w");
+			g_LogFileRevive = _wfopen(LogPath, L"a");
 	}	
 
 #if defined(_WIN64)
@@ -64,6 +65,7 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserve
 	{
 		case DLL_PROCESS_ATTACH:
 			GetModuleFileName((HMODULE)hModule, revModuleName, MAX_PATH);
+			//fprintf(g_LogFileRevive, "rev module name: %ws\n", revModuleName);
 			swprintf(ovrModuleName, MAX_PATH, L"LibOVRRT%hs_%d.dll", pBitDepth, OVR_MAJOR_VERSION);
 
 			MH_Initialize();

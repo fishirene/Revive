@@ -1,35 +1,38 @@
 #pragma once
 
-#include "OVR_CAPI.h"
-#include "Extras/OVR_Math.h"
 #include <thread>
 #include <vector>
 #include <Windows.h>
+
+#include "OVR_CAPI.h"
+#include "Extras/OVR_Math.h"
+
 #include "Utils.h"
+
+class OculusTouch
+{
+public:
+	OculusTouch(ovrControllerType role);
+	virtual ~OculusTouch() {}
+
+	ovrControllerType ControllerType;
+
+	unsigned int GetStatusFlag();
+	ovrPoseStatef GetOffset(double absTime);
+	void EmulateTouchPositionOffset(float x, float y);
+	void EmulateTouchOrientationOffset(float x, float y, float z, float w);
+
+private:
+	ovrPoseStatef m_LastOffset;
+	ovrPoseStatef m_EmulatedOffset;
+	ovrVector3f m_HeadHandPositionOffset;
+};
 
 class InputManager
 {
 public:
-	class OculusTouch
-	{
-	public:
-		OculusTouch(ovrControllerType role);
-		virtual ~OculusTouch() {}
-
-		ovrControllerType ControllerType;
-
-		unsigned int GetStatusFlag();
-		ovrPoseStatef GetOffset(double absTime);
-		void EmulateTouchPositionOffset(float x, float y);
-		void EmulateTouchOrientationOffset(float x, float y, float z, float w);
-
-	private:
-		ovrPoseStatef m_LastOffset;
-		ovrPoseStatef m_EmulatedOffset;
-		ovrVector3f m_HeadHandPositionOffset;	
-	};
-	
-	InputManager();
+	static InputManager* GetInstance();
+	//InputManager();
 	~InputManager();
 
 	unsigned int GetConnectedControllerTypes();
@@ -41,10 +44,13 @@ public:
 	void EmulateTouchesInputState(unsigned int touchKey, bool state, float value, float x, float y);
 	void EmulateResetTouchesPose();
 
-protected:
+private:
+	InputManager();
+	static InputManager* m_Instance;
 	OculusTouch* m_TouchL;
 	OculusTouch* m_TouchR;
-private:
-	ovrInputState m_LastState;
+	ovrInputState* m_LastState;
 };
+
+
 

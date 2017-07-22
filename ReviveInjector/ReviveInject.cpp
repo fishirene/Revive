@@ -74,11 +74,6 @@ int CreateProcessAndInject(wchar_t *programPath) {
 	}
 #endif
 
-	/*if (!InjectOpenVR(pi.hProcess) ||
-		!InjectLibRevive(pi.hProcess)) {
-		ResumeThread(pi.hThread);
-		return -1;
-	}*/
 	if (!InjectLibRevive(pi.hProcess)) {
 		ResumeThread(pi.hThread);
 		return -1;
@@ -98,11 +93,6 @@ int OpenProcessAndInject(wchar_t *processId) {
 		LOG("Failed to get process handle\n");
 		return -1;
 	}
-
-	/*if (!InjectOpenVR(hProcess) ||
-		!InjectLibRevive(hProcess)) {
-		return -1;
-	}*/
 
 	if (!InjectLibRevive(hProcess)) {
 		return -1;
@@ -133,10 +123,6 @@ bool InjectLibRevive(HANDLE hProcess) {
 	return InjectDLL(hProcess, "LibRevive32_1.dll");
 #endif
 }
-
-//bool InjectOpenVR(HANDLE hProcess) {
-//	return InjectDLL(hProcess, "openvr_api.dll");
-//}
 
 bool InjectDLL(HANDLE hProcess, const char *dllPath, int dllPathLength)
 {

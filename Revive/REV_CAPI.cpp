@@ -1,11 +1,11 @@
-#include <wrl/client.h>
-#include <Shlwapi.h>
-#include <Shlobj.h>
+//#include <wrl/client.h>
+//#include <Shlwapi.h>
+//#include <Shlobj.h>
+//
+//#include <MinHook.h>
 
-#include <MinHook.h>
-
-#include "OVR_CAPI.h"
-#include "OVR_Version.h"
+//#include "OVR_CAPI.h"
+//#include "OVR_Version.h"
 
 #include "Utils.h"
 #include "InputManager.h"
@@ -14,14 +14,12 @@
 
 uint32_t g_MinorVersion = OVR_MINOR_VERSION;
 
-//InputManager g_InputManager;
 InputManager* g_InputManager = InputManager::GetInstance();
 
 bool g_DebugPrinted = FALSE;
 
 REV_PUBLIC_FUNCTION(ovrTrackingState) rev_GetTrackingState(ovrSession session, double absTime, ovrBool latencyMarker)
 {
-	fprintf(g_LogFileRevive, "g_InputManager when get tracking: %p\n", g_InputManager);
 	ovrTrackingState state = g_TrampolineFuncAddress(session, absTime, latencyMarker);
 	g_InputManager->GetTrackingState(session, &state, absTime);
 	return state;
@@ -43,40 +41,36 @@ REV_PUBLIC_FUNCTION(ovrResult) rev_GetInputState(ovrSession session, ovrControll
 	controllerType = (ovrControllerType)rev_GetConnectedControllerTypes(session);
 	
 	ovrResult result = g_InputManager->GetInputState(session, controllerType, inputState);
-	fprintf(g_LogFileRevive, "g_InputManager: %p\n", g_InputManager);
-	//fprintf(g_LogFileRevive, "Hand trigger: %g\n", inputState->HandTrigger[0]);
-	//fprintf(g_LogFileRevive, "Hand trigger n deadzone: %g\n", inputState->HandTriggerNoDeadzone[0]);
-	//fprintf(g_LogFileRevive, "Hand trigger raw: %g\n", inputState->HandTriggerRaw[0]);
 	return result;
 }
 
-REV_PUBLIC_FUNCTION(void) rev_EmulateTouchPositionOffset(bool l, float x, float y)
-{
-	if (l)
-	{
-		g_InputManager->EmulateTouchesPositionOffset(ovrControllerType_LTouch, x, y);
-	}
-	else
-	{
-		g_InputManager->EmulateTouchesPositionOffset(ovrControllerType_RTouch, x, y);
-	}
-}
+//REV_PUBLIC_FUNCTION(void) rev_EmulateTouchPositionOffset(bool l, float x, float y)
+//{
+//	if (l)
+//	{
+//		g_InputManager->EmulateTouchesPositionOffset(ovrControllerType_LTouch, x, y);
+//	}
+//	else
+//	{
+//		g_InputManager->EmulateTouchesPositionOffset(ovrControllerType_RTouch, x, y);
+//	}
+//}
 
-REV_PUBLIC_FUNCTION(void) rev_EmulateTouchesInputState(unsigned int touchKey, bool state, float value, float x, float y)
-{
-	//fprintf(g_LogFileRevive, "External call, Touchkey: %u\n", touchKey);
-	//fprintf(g_LogFileRevive, "External call, State: %u\n", state);
-	//fprintf(g_LogFileRevive, "External call, Value: %g\n", value);
-	//fprintf(g_LogFileRevive, "External call, x: %g\n", x);
-	//fprintf(g_LogFileRevive, "External call, y: %g\n", y);
-	g_InputManager->EmulateTouchesInputState(touchKey, state, value, x, y);
-	fprintf(g_LogFileRevive, "g_InputManager when emulation: %p\n", g_InputManager);
-}
+//REV_PUBLIC_FUNCTION(void) rev_EmulateTouchesInputState(unsigned int touchKey, bool state, float value, float x, float y)
+//{
+//	//fprintf(g_LogFileRevive, "External call, Touchkey: %u\n", touchKey);
+//	//fprintf(g_LogFileRevive, "External call, State: %u\n", state);
+//	//fprintf(g_LogFileRevive, "External call, Value: %g\n", value);
+//	//fprintf(g_LogFileRevive, "External call, x: %g\n", x);
+//	//fprintf(g_LogFileRevive, "External call, y: %g\n", y);
+//	g_InputManager->EmulateTouchesInputState(touchKey, state, value, x, y);
+//	//fprintf(g_LogFileRevive, "g_InputManager when emulation: %p\n", g_InputManager);
+//}
 
-REV_PUBLIC_FUNCTION(void) rev_EmulateResetTouchesPose()
-{
-	g_InputManager->EmulateResetTouchesPose();
-}
+//REV_PUBLIC_FUNCTION(void) rev_EmulateResetTouchesPose()
+//{
+//	g_InputManager->EmulateResetTouchesPose();
+//}
 
 //OVR_PUBLIC_FUNCTION(unsigned int) ovr_GetTrackerCount(ovrSession session)
 //{

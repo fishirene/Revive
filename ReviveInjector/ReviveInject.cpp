@@ -135,7 +135,7 @@ bool InjectDLL(HANDLE hProcess, const char *dllPath, int dllPathLength)
 		LOG("Unable to locate LoadLibraryA\n");
 		return false;
 	}
-	LOG("LoadLibrary found at address: 0x%x\n", loadLibraryAddr);
+	LOG("LoadLibrary found at address: 0x%p\n", loadLibraryAddr);
 
 	LPVOID loadLibraryArg = (LPVOID)VirtualAllocEx(hProcess, NULL, dllPathLength, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
 	if (loadLibraryArg == NULL)

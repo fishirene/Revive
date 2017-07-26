@@ -223,10 +223,12 @@
     <ClInclude Include="..\LibOVR\Include\OVR_CAPI.h" />
     <ClInclude Include="..\LibOVR\Include\OVR_ErrorCode.h" />
     <ClInclude Include="..\LibOVR\Include\OVR_Version.h" />
+    <ClInclude Include="InputServer.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="InputManager.cpp" />
+    <ClCompile Include="InputServer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="REV_CAPI.cpp" />
   </ItemGroup>

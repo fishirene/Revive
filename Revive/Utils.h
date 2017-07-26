@@ -1,15 +1,30 @@
 #pragma once
+
+#include <WinSock2.h>
+#include <ws2tcpip.h>
 #include <Windows.h>
 #include <stdio.h>
+#include <process.h>
 #include <Shlwapi.h>
 #include <Shlobj.h>
+#include <thread>
+#include <vector>
+#include <string>
+#include <regex>
+
+#include <MinHook.h>
+
+#include "OVR_CAPI.h"
+#include "OVR_Version.h"
+#include "OVR_CAPI_Util.h"
+#include "Extras/OVR_Math.h"
 
 typedef ovrTrackingState(__cdecl* _GetTrackingState)(ovrSession session, double absTime, ovrBool latencyMarker);
 extern _GetTrackingState g_TrampolineFuncAddress;
 
-extern FILE* g_LogFileRevive;
-#define LOG(x, ...) if (g_LogFileRevive) fprintf(g_LogFileRevive, x, __VA_ARGS__); \
-					fflush(g_LogFileRevive);
+//extern FILE* g_LogFileRevive;
+//#define LOG(x, ...) if (g_LogFileRevive) fprintf(g_LogFileRevive, x, __VA_ARGS__); \
+//					fflush(g_LogFileRevive);
 
 #define REV_PUBLIC_FUNCTION(rval) extern "C" __declspec(dllexport) rval __cdecl
 

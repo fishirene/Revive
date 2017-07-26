@@ -1,15 +1,17 @@
-#include <Windows.h>
-#include <stdio.h>
-#include <Shlwapi.h>
-#include <Shlobj.h>
-#include <string>
- 
-#include "MinHook.h"
-
-#include "OVR_CAPI_Util.h"
-#include "OVR_Version.h"
+//#include <Windows.h>
+//#include <stdio.h>
+//#include <Shlwapi.h>
+//#include <Psapi.h>
+//#include <Shlobj.h>
+//#include <string>
+// 
+//#include "MinHook.h"
+//
+//#include "OVR_CAPI_Util.h"
+//#include "OVR_Version.h"
 
 #include "Utils.h"
+#include "InputServer.h"
 
 FILE* g_LogFileRevive = NULL;
 
@@ -40,7 +42,7 @@ FARPROC WINAPI HookProcAddress(HMODULE hModule, LPCSTR lpProcName)
 	return TrueProcAddress(hModule, lpProcName);
 }
 
-BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
+void CreateLogFile()
 {
 	WCHAR LogPath[MAX_PATH];
 	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, LogPath)))
@@ -53,8 +55,16 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserve
 
 		wcsncat(LogPath, L"\\Revive.txt", MAX_PATH);
 		if (exists)
-			g_LogFileRevive = _wfopen(LogPath, L"a");
-	}	
+			g_LogFileRevive = _wfopen(LogPath, L"w");
+		fprintf(g_LogFileRevive, "Log file created: %ws\n", LogPath);
+	}
+}
+
+BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
+{
+	CreateLogFile();
+
+	InputServer* inputServer = InputServer::GetInstance();
 
 #if defined(_WIN64)
 	const char* pBitDepth = "64";
@@ -65,7 +75,6 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserve
 	{
 		case DLL_PROCESS_ATTACH:
 			GetModuleFileName((HMODULE)hModule, revModuleName, MAX_PATH);
-			//fprintf(g_LogFileRevive, "rev module name: %ws\n", revModuleName);
 			swprintf(ovrModuleName, MAX_PATH, L"LibOVRRT%hs_%d.dll", pBitDepth, OVR_MAJOR_VERSION);
 
 			MH_Initialize();
@@ -74,6 +83,10 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserve
 			MH_QueueEnableHook(GetProcAddress);
 			MH_ApplyQueued();
 
+			//Create a server thread
+			fprintf(g_LogFileRevive, "To start server.\n");
+			_beginthread(&InputServer::StartWrapper, 0, static_cast<void*>(inputServer));
+
 			break;
 		case DLL_PROCESS_DETACH:
 			MH_Uninitialize();
@@ -81,9 +94,14 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserve
 			MH_QueueDisableHook(GetProcAddress);
 			MH_ApplyQueued();
 
+			inputServer->Run = FALSE;
+			//End the server thread
+			_endthread();
+
 			break;
 		default:
 			break;
 	}
+
 	return TRUE;
 }

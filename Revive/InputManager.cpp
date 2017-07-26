@@ -1,8 +1,5 @@
 #include "InputManager.h"
 
-//OculusTouch* InputManager::m_TouchL = new OculusTouch(ovrControllerType_LTouch);
-//OculusTouch* InputManager::m_TouchR = new OculusTouch(ovrControllerType_RTouch);
-//ovrInputState InputManager::m_LastState = {0};
 InputManager* InputManager::m_Instance = 0;
 
 OculusTouch::OculusTouch(ovrControllerType role)
@@ -70,6 +67,20 @@ InputManager::InputManager()
 	, m_LastState(new ovrInputState())
 {
 	m_LastState->ControllerType = (ovrControllerType)GetConnectedControllerTypes();
+
+	WCHAR LogPath[MAX_PATH];
+	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, LogPath)))
+	{
+		wcsncat(LogPath, L"\\Revive", MAX_PATH);
+
+		BOOL exists = PathFileExists(LogPath);
+		if (!exists)
+			exists = CreateDirectory(LogPath, NULL);
+
+		wcsncat(LogPath, L"\\Revive.txt", MAX_PATH);
+		if (exists)
+			m_ReviveLog = _wfopen(LogPath, L"w");
+	}
 }
 
 InputManager::~InputManager()
@@ -237,11 +248,12 @@ void InputManager::EmulateTouchesInputState(unsigned int touchKey, bool state, f
 	default:
 		break;
 	}
-	fprintf(g_LogFileRevive, "m_LastState Getinput ovrTouch_LHandTrigger when emulation: %p\n", this);
+	LogRevive("m_LastState Getinput ovrTouch_LHandTrigger when emulation: %g\n", m_LastState->HandTrigger[0]);
 }
 
-void InputManager::EmulateTouchesPositionOffset(ovrControllerType controllerType, float x, float y)
+void InputManager::EmulateTouchesPositionOffset(unsigned int controllerType, float x, float y)
 {
+	controllerType = (ovrControllerType)controllerType;
 	switch (controllerType)
 	{
 	case ovrControllerType_LTouch:
@@ -260,7 +272,7 @@ void InputManager::EmulateTouchesOrientationOffset(ovrControllerType controllerT
 
 ovrResult InputManager::GetInputState(ovrSession session, ovrControllerType controllerType, ovrInputState* inputState)
 {
-	fprintf(g_LogFileRevive, "m_LastState Getinput ovrTouch_LHandTrigger: %p\n", this);
+	//LogRevive("m_LastState Getinput ovrTouch_LHandTrigger: %g\n", m_LastState->HandTrigger[0]);
 	inputState->Buttons = m_LastState->Buttons;
 	inputState->Touches = m_LastState->Touches;
 	inputState->ControllerType = m_LastState->ControllerType;

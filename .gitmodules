@@ -1,15 +1,5 @@
-[submodule "openvr"]
-	path = openvr
-	url = https://github.com/ValveSoftware/openvr.git
 [submodule "minhook"]
 	path = minhook
 	url = https://github.com/TsudaKageyu/minhook.git
-[submodule "glew"]
-	path = glew
-	url = https://github.com/LibreVR/ext-win-glew.git
-[submodule "WinSparkle"]
-	path = WinSparkle
-	url = https://github.com/LibreVR/ext-win-sparkle.git
-[submodule "microprofile"]
-	path = microprofile
-	url = https://github.com/zeux/microprofile.git
+[submodule "LibOVR"]
+	path = LibOVR

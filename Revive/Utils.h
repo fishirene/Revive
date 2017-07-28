@@ -9,6 +9,7 @@
 #include <Shlobj.h>
 #include <thread>
 #include <vector>
+#include <queue>
 #include <string>
 #include <regex>
 
@@ -51,6 +52,8 @@ extern _GetTrackingState g_TrampolineFuncAddress;
 
 #define REV_KEY_IGNORE_ACTIVITYLEVEL		"IgnoreActivityLevel"
 #define REV_DEFAULT_IGNORE_ACTIVITYLEVEL	false
+
+#define REV_TRIGGER_THRESHOLD				0.1176f
 
 typedef enum ovrTouchSuppliment_ {
 	ovrTouch_LThumbstick = 0x00000080,

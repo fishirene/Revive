@@ -1,13 +1,5 @@
 #pragma once
 
-//#define WIN32_LEAN_AND_MEAN
-
-//#include <WinSock2.h>
-//#include <windows.h>
-//#include <ws2tcpip.h>
-//#include <stdlib.h>
-//#include <stdio.h>
-
 #include "Utils.h"
 #include "InputManager.h"
 
@@ -35,10 +27,11 @@ private:
 	static InputServer* m_Instance;
 
 	InputManager* g_InputManager;
-
-	SOCKET m_ClientSocket;
-	SOCKET m_ListenSocket;
 	FILE* m_ServerLog;
+
+	//SOCKET m_ClientSocket;
+	//SOCKET m_ListenSocket;
+	
 	char m_Recvbuf[DEFAULT_BUFLEN];
 	bool m_IsProcessing;
 

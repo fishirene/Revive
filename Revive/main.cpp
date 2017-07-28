@@ -1,19 +1,7 @@
-//#include <Windows.h>
-//#include <stdio.h>
-//#include <Shlwapi.h>
-//#include <Psapi.h>
-//#include <Shlobj.h>
-//#include <string>
-// 
-//#include "MinHook.h"
-//
-//#include "OVR_CAPI_Util.h"
-//#include "OVR_Version.h"
-
 #include "Utils.h"
 #include "InputServer.h"
 
-FILE* g_LogFileRevive = NULL;
+//FILE* g_LogFileRevive = NULL;
 
 typedef FARPROC(__stdcall* _GetProcAddress)(HMODULE hModule, LPCSTR lpProcName);
 
@@ -42,28 +30,26 @@ FARPROC WINAPI HookProcAddress(HMODULE hModule, LPCSTR lpProcName)
 	return TrueProcAddress(hModule, lpProcName);
 }
 
-void CreateLogFile()
-{
-	WCHAR LogPath[MAX_PATH];
-	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, LogPath)))
-	{
-		wcsncat(LogPath, L"\\Revive", MAX_PATH);
-
-		BOOL exists = PathFileExists(LogPath);
-		if (!exists)
-			exists = CreateDirectory(LogPath, NULL);
-
-		wcsncat(LogPath, L"\\Revive.txt", MAX_PATH);
-		if (exists)
-			g_LogFileRevive = _wfopen(LogPath, L"w");
-		fprintf(g_LogFileRevive, "Log file created: %ws\n", LogPath);
-	}
-}
+//void CreateLogFile()
+//{
+//	WCHAR LogPath[MAX_PATH];
+//	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, LogPath)))
+//	{
+//		wcsncat(LogPath, L"\\Revive", MAX_PATH);
+//
+//		BOOL exists = PathFileExists(LogPath);
+//		if (!exists)
+//			exists = CreateDirectory(LogPath, NULL);
+//
+//		wcsncat(LogPath, L"\\Revive.txt", MAX_PATH);
+//		if (exists)
+//			g_LogFileRevive = _wfopen(LogPath, L"w");
+//		fprintf(g_LogFileRevive, "Log file created: %ws\n", LogPath);
+//	}
+//}
 
 BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
 {
-	CreateLogFile();
-
 	InputServer* inputServer = InputServer::GetInstance();
 
 #if defined(_WIN64)
@@ -84,7 +70,6 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserve
 			MH_ApplyQueued();
 
 			//Create a server thread
-			fprintf(g_LogFileRevive, "To start server.\n");
 			_beginthread(&InputServer::StartWrapper, 0, static_cast<void*>(inputServer));
 
 			break;

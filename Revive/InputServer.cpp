@@ -5,8 +5,8 @@ InputServer* InputServer::m_Instance = 0;
 InputServer::InputServer()
 	: Run(TRUE)
 	, m_IsProcessing(FALSE)
-	, m_ClientSocket(INVALID_SOCKET)
-	, m_ListenSocket(INVALID_SOCKET)
+	//, m_ClientSocket(INVALID_SOCKET)
+	//, m_listenSocket(INVALID_SOCKET)
 	, m_Recvbuf{ '0' }
 	, g_InputManager(InputManager::GetInstance())
 {
@@ -46,12 +46,15 @@ void __cdecl InputServer::StartWrapper(void* p)
 }
 
 unsigned int InputServer::m_Start() {
+	memset(m_Recvbuf, 0, sizeof(m_Recvbuf));
+
 	int iResult = 0;
 	int iSendResult = 0;
 	struct addrinfo *result = NULL;
 	struct addrinfo hints;
 	WSADATA wsaData;
-	SOCKET m_ListenSocket;
+	SOCKET listenSocket;
+	SOCKET clientSocket;
 
 	LogServer("Server Started.\n");
 
@@ -77,8 +80,8 @@ unsigned int InputServer::m_Start() {
 	}
 
 	// Create a SOCKET for connecting to server
-	m_ListenSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
-	if (m_ListenSocket == INVALID_SOCKET) {
+	listenSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+	if (listenSocket == INVALID_SOCKET) {
 		LogServer("socket failed with error: %ld\n", WSAGetLastError());
 		freeaddrinfo(result);
 		WSACleanup();
@@ -86,81 +89,73 @@ unsigned int InputServer::m_Start() {
 	}
 
 	// Setup the TCP listening socket
-	iResult = bind(m_ListenSocket, result->ai_addr, (int)result->ai_addrlen);
+	iResult = bind(listenSocket, result->ai_addr, (int)result->ai_addrlen);
 	if (iResult == SOCKET_ERROR) {
 		LogServer("bind failed with error: %d\n", WSAGetLastError());
 		freeaddrinfo(result);
-		closesocket(m_ListenSocket);
+		closesocket(listenSocket);
 		WSACleanup();
 		return FALSE;
 	}
 
 	freeaddrinfo(result);
 
-	iResult = listen(m_ListenSocket, SOMAXCONN);
+	iResult = listen(listenSocket, SOMAXCONN);
 	if (iResult == SOCKET_ERROR) {
 		LogServer("listen failed with error: %d\n", WSAGetLastError());
-		closesocket(m_ListenSocket);
+		closesocket(listenSocket);
 		WSACleanup();
 		return FALSE;
 	}
+
+	// Accept a client socket
+	clientSocket = accept(listenSocket, NULL, NULL);
+	if (clientSocket == INVALID_SOCKET) {
+		LogServer("accept failed with error: %d\n", WSAGetLastError());
+		closesocket(listenSocket);
+		WSACleanup();
+		return FALSE;
+	}
+	LogServer("A client connected.\n");
 
 	while (Run)
 	{
 		if (m_IsProcessing)
 			continue;
-		// Accept a client socket
-		m_ClientSocket = accept(m_ListenSocket, NULL, NULL);
-		if (m_ClientSocket == INVALID_SOCKET) {
-			LogServer("accept failed with error: %d\n", WSAGetLastError());
-			closesocket(m_ListenSocket);
-			WSACleanup();
-			return FALSE;
-		}
-		LogServer("A client connected.\n");
 
-	//do
-	//{
-		iResult = recv(m_ClientSocket, m_Recvbuf, DEFAULT_BUFLEN, 0);
+		//// Accept a client socket
+		//clientSocket = accept(listenSocket, NULL, NULL);
+		//if (clientSocket == INVALID_SOCKET) {
+		//	LogServer("accept failed with error: %d\n", WSAGetLastError());
+		//}
+		//LogServer("A client connected.\n");
+
+		iResult = recv(clientSocket, m_Recvbuf, DEFAULT_BUFLEN, 0);
 		if (iResult > 0) {
 			LogServer("Message received: %s\n", m_Recvbuf);
 			m_MessageProcess();
 			// Echo the buffer back to the sender
-			iSendResult = send(m_ClientSocket, m_Recvbuf, iResult, 0);
+			iSendResult = send(clientSocket, m_Recvbuf, iResult, 0);
 			if (iSendResult == SOCKET_ERROR) {
 				LogServer("send failed with error: %d\n", WSAGetLastError());
-				//closesocket(m_ClientSocket);
-				//WSACleanup();
-				//return FALSE;
 			}
-			//LogServer("Bytes sent: %d\n", iSendResult);
+			//LogServer("Feedback sent: %s\n", m_Recvbuf);
 		}
-		//else if (iResult == 0) {
-		//	LogServer("Connection closing...\n");
-		//}
-		//else {
-		//	LogServer("recv failed with error: %d\n", WSAGetLastError());
-		//	//closesocket(m_ClientSocket);
-		//	//WSACleanup();
-		//	//return FALSE;
-		//}
-
-	//} while (iResult > 0);
 	}
 
-	closesocket(m_ListenSocket);
+	closesocket(listenSocket);
 
 	// shutdown the connection since we're done
-	iResult = shutdown(m_ClientSocket, SD_SEND);
+	iResult = shutdown(clientSocket, SD_SEND);
 	if (iResult == SOCKET_ERROR) {
 		LogServer("shutdown failed with error: %d\n", WSAGetLastError());
-		closesocket(m_ClientSocket);
+		closesocket(clientSocket);
 		WSACleanup();
 		return FALSE;
 	}
 
 	// cleanup
-	closesocket(m_ClientSocket);
+	closesocket(clientSocket);
 	WSACleanup();
 
 	return TRUE;
@@ -169,46 +164,95 @@ unsigned int InputServer::m_Start() {
 bool InputServer::m_MessageProcess()
 {
 	m_IsProcessing = TRUE;
+
 	unsigned int touchKey = 0;
 	bool state = 0;
 	float value = 0, x = 0, y = 0;
 
 	std::string s = m_Recvbuf;
 	std::regex position("position");
-	std::regex input("input");
+	std::regex rotation("rotation");
+	std::regex button("button");
+	std::regex stick("stick");
+	std::regex trigger("trigger");
 	std::regex reset("reset");
-	std::regex digit("\\b\\d+\\.*\\d*");
+	std::regex digit("-?\\b\\d+\\.?\\d*");
 	std::smatch m;
 	std::vector<std::string> keys;
 
-	if (std::regex_search(s, position))
+	while (std::regex_search(s, m, digit)) {
+		keys.push_back(m.str());
+		s = m.suffix().str();
+	}
+
+	if (std::regex_search(m_Recvbuf, position))
 	{
-		while (std::regex_search(s, m, digit)) {
-			keys.push_back(m.str().c_str());
-			s = m.suffix().str();
-		}
-		if (keys.size() == 3)
+		if (keys.size() % 3 == 0)
 		{
-			//g_InputManager->EmulateTouchesPositionOffset((unsigned int)atoi(keys[0].c_str()), (float)atof(keys[1].c_str()), (float)atof(keys[2].c_str()));
+			LogServer("Position set.\n");
+			while (!keys.empty())
+			{
+				g_InputManager->EmulateTouchesPositionOffset((unsigned int)atoi(keys[0].c_str()), (float)atof(keys[1].c_str()), (float)atof(keys[2].c_str()));
+				keys.erase(keys.begin(), keys.begin() + 3);
+			}
 		}
 	}
-	else if (std::regex_search(s, input))
+	else if (std::regex_search(m_Recvbuf, rotation))
 	{
-		while (std::regex_search(s, m, digit)) {
-			keys.push_back(m.str());
-			s = m.suffix().str();
-		}
-		if (keys.size() == 5)
-		{			
-			g_InputManager->EmulateTouchesInputState((unsigned int)atoi(keys[0].c_str()), (bool)atoi(keys[1].c_str()), (float)atof(keys[2].c_str()), (float)atof(keys[3].c_str()), (float)atof(keys[4].c_str()));
+		if (keys.size() % 3 == 0)
+		{
+			LogServer("Rotation set.\n");
+			while (!keys.empty())
+			{
+				g_InputManager->EmulateTouchesOrientationOffset((unsigned int)atoi(keys[0].c_str()), (unsigned int)atoi(keys[1].c_str()), (float)atof(keys[2].c_str()));
+				keys.erase(keys.begin(), keys.begin() + 3);
+			}
 		}
 	}
-	else if (std::regex_search(s, reset))
+	else if (std::regex_search(m_Recvbuf, trigger))
 	{
-		LogServer("pose reset\n");
+		if (keys.size() % 2 == 0)
+		{
+			LogServer("Trigger set.\n");
+			while (!keys.empty())
+			{
+				g_InputManager->EmulateTouchesInputState((unsigned int)atoi(keys[0].c_str()), (float)atof(keys[1].c_str()));
+				keys.erase(keys.begin(), keys.begin() + 2);
+			}
+		}
+	}
+	else if (std::regex_search(m_Recvbuf, button))
+	{
+		if (keys.size() % 2 == 0)
+		{
+			LogServer("Button set.\n");
+			while (!keys.empty())
+			{
+				g_InputManager->EmulateTouchesInputState((unsigned int)atoi(keys[0].c_str()), (bool)atoi(keys[1].c_str()));
+				keys.erase(keys.begin(), keys.begin() + 2);
+			}
+		}
+	}
+	else if (std::regex_search(m_Recvbuf, stick))
+	{
+		if (keys.size() % 3 == 0)
+		{
+			LogServer("Stick set.\n");
+			while (!keys.empty())
+			{
+				g_InputManager->EmulateTouchesInputState((unsigned int)atoi(keys[0].c_str()), (float)atof(keys[1].c_str()), (float)atof(keys[2].c_str()));
+				keys.erase(keys.begin(), keys.begin() + 3);
+			}
+		}
+	}
+	else if (std::regex_search(m_Recvbuf, reset))
+	{
+		LogServer("Pose reset.\n");
 		g_InputManager->EmulateResetTouchesPose();
 	}
 	
+	memset(m_Recvbuf, 0, sizeof(m_Recvbuf));
+
 	m_IsProcessing = FALSE;
 	return TRUE;
 }

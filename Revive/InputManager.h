@@ -1,12 +1,5 @@
 #pragma once
 
-//#include <thread>
-//#include <vector>
-//#include <Windows.h>
-
-//#include "OVR_CAPI.h"
-//#include "Extras/OVR_Math.h"
-
 #include "Utils.h"
 
 #define LogRevive(x, ...) if (m_ReviveLog) fprintf(m_ReviveLog, x, __VA_ARGS__); \
@@ -24,11 +17,10 @@ public:
 	unsigned int GetStatusFlag();
 	ovrPoseStatef GetOffset(double absTime);
 	void EmulateTouchPositionOffset(float x, float y);
-	void EmulateTouchOrientationOffset(float x, float y, float z, float w);
+	void EmulateTouchOrientationOffset(unsigned int axis, float degree);
 
 private:
 	ovrPoseStatef m_LastOffset;
-	ovrPoseStatef m_EmulatedOffset;
 	ovrVector3f m_HeadHandPositionOffset;
 };
 
@@ -43,8 +35,10 @@ public:
 	void GetTrackingState(ovrSession session, ovrTrackingState* outState, double absTime);
 	ovrResult GetDevicePoses(ovrTrackedDeviceType* deviceTypes, int deviceCount, double absTime, ovrPoseStatef* outDevicePoses);
 	void EmulateTouchesPositionOffset(unsigned int controllerType, float x, float y);
-	void EmulateTouchesOrientationOffset(ovrControllerType controllerType, float x, float y, float z, float w);
-	void EmulateTouchesInputState(unsigned int touchKey, bool state, float value, float x, float y);
+	void EmulateTouchesOrientationOffset(unsigned int controllerType, unsigned int axis, float radian);
+	void EmulateTouchesInputState(unsigned int touchKey, bool state);
+	void EmulateTouchesInputState(unsigned int touchKey, float value);
+	void EmulateTouchesInputState(unsigned int touchKey, float x, float y);
 	void EmulateResetTouchesPose();
 
 private:

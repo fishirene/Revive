@@ -1,12 +1,3 @@
-//#include <wrl/client.h>
-//#include <Shlwapi.h>
-//#include <Shlobj.h>
-//
-//#include <MinHook.h>
-
-//#include "OVR_CAPI.h"
-//#include "OVR_Version.h"
-
 #include "Utils.h"
 #include "InputManager.h"
 
@@ -54,17 +45,6 @@ REV_PUBLIC_FUNCTION(ovrResult) rev_GetInputState(ovrSession session, ovrControll
 //	{
 //		g_InputManager->EmulateTouchesPositionOffset(ovrControllerType_RTouch, x, y);
 //	}
-//}
-
-//REV_PUBLIC_FUNCTION(void) rev_EmulateTouchesInputState(unsigned int touchKey, bool state, float value, float x, float y)
-//{
-//	//fprintf(g_LogFileRevive, "External call, Touchkey: %u\n", touchKey);
-//	//fprintf(g_LogFileRevive, "External call, State: %u\n", state);
-//	//fprintf(g_LogFileRevive, "External call, Value: %g\n", value);
-//	//fprintf(g_LogFileRevive, "External call, x: %g\n", x);
-//	//fprintf(g_LogFileRevive, "External call, y: %g\n", y);
-//	g_InputManager->EmulateTouchesInputState(touchKey, state, value, x, y);
-//	//fprintf(g_LogFileRevive, "g_InputManager when emulation: %p\n", g_InputManager);
 //}
 
 //REV_PUBLIC_FUNCTION(void) rev_EmulateResetTouchesPose()

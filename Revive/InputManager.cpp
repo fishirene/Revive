@@ -6,7 +6,6 @@ OculusTouch::OculusTouch(ovrControllerType role)
 	: ControllerType(role)
 	, m_LastOffset({ OVR::Posef::Identity() })
 	, m_HeadHandPositionOffset()
-	, m_EmulatedOffset({ OVR::Posef::Identity() })
 {
 	switch (role)
 	{
@@ -19,9 +18,8 @@ OculusTouch::OculusTouch(ovrControllerType role)
 	default:
 		break;
 	}
-	m_LastOffset.ThePose.Position.x += m_HeadHandPositionOffset.x;
-	m_LastOffset.ThePose.Position.y += m_HeadHandPositionOffset.y;
-	m_LastOffset.ThePose.Position.z += m_HeadHandPositionOffset.z;
+
+	m_LastOffset.ThePose.Position = m_HeadHandPositionOffset;
 }
 
 unsigned int OculusTouch::GetStatusFlag()
@@ -37,28 +35,24 @@ ovrPoseStatef OculusTouch::GetOffset(double absTime)
 {
 	m_LastOffset.TimeInSeconds = absTime;
 
-	m_LastOffset.ThePose.Position.x += m_EmulatedOffset.ThePose.Position.x;
-	m_LastOffset.ThePose.Position.y += m_EmulatedOffset.ThePose.Position.y;
-	m_LastOffset.ThePose.Position.z += m_EmulatedOffset.ThePose.Position.z;
-
-	//Orientation setting
-	//m_LastOffset.ThePose.Position.x += m_EmulatedOffset.ThePose.Position.x;
-	//m_LastOffset.ThePose.Position.y += m_EmulatedOffset.ThePose.Position.y;
-	//m_LastOffset.ThePose.Position.z += m_EmulatedOffset.ThePose.Position.z;
-
 	return m_LastOffset;
 }
 
 void OculusTouch::EmulateTouchPositionOffset(float x, float y)
 {
-	m_EmulatedOffset.ThePose.Position.x = x;
-	m_EmulatedOffset.ThePose.Position.y = y;
-	m_EmulatedOffset.ThePose.Position.z = 0;
+	OVR::Vector3f tmpOffset(x, y, 0);
+	OVR::Vector3f offset = m_LastOffset.ThePose.Position;
+	offset += tmpOffset;
+	m_LastOffset.ThePose.Position = offset;
 }
 
-void OculusTouch::EmulateTouchOrientationOffset(float x, float y, float z, float w)
+void OculusTouch::EmulateTouchOrientationOffset(unsigned int axis, float degree)
 {
-	//m_EmulatedOffset.Orientation;
+	float radian = OVR::DegreeToRad(degree);
+	OVR::Quatf tmpOffset = OVR::Quat<float>((OVR::Axis)axis, radian, OVR::Rotate_CCW, OVR::Handed_R);
+	OVR::Quatf offset = m_LastOffset.ThePose.Orientation;
+	offset *= tmpOffset;
+	m_LastOffset.ThePose.Orientation = offset;
 }
 
 InputManager::InputManager()
@@ -120,34 +114,57 @@ void InputManager::EmulateResetTouchesPose()
 	m_LastState->ControllerType = (ovrControllerType)GetConnectedControllerTypes();
 }
 
-void InputManager::EmulateTouchesInputState(unsigned int touchKey, bool state, float value, float x, float y)
+void InputManager::EmulateTouchesInputState(unsigned int touchKey, bool state)
 {
-	ovrVector2f thumbstick;
 	switch (touchKey)
 	{
 	case ovrTouch_A:
 		if (state)
+		{
+			m_LastState->Buttons |= ovrButton_A;
 			m_LastState->Touches |= ovrTouch_A;
+		}
 		else
+		{
+			m_LastState->Buttons &= ~ovrButton_A;
 			m_LastState->Touches &= ~ovrTouch_A;
+		}
 		break;
 	case ovrTouch_B:
 		if (state)
+		{
+			m_LastState->Buttons |= ovrButton_B;
 			m_LastState->Touches |= ovrTouch_B;
+		}
 		else
+		{
+			m_LastState->Buttons &= ~ovrButton_B;
 			m_LastState->Touches &= ~ovrTouch_B;
+		}
 		break;
 	case ovrTouch_X:
 		if (state)
+		{
+			m_LastState->Buttons |= ovrButton_X;
 			m_LastState->Touches |= ovrTouch_X;
+		}
 		else
+		{
+			m_LastState->Buttons &= ~ovrButton_X;
 			m_LastState->Touches &= ~ovrTouch_X;
+		}
 		break;
 	case ovrTouch_Y:
 		if (state)
+		{
+			m_LastState->Buttons |= ovrButton_Y;
 			m_LastState->Touches |= ovrTouch_Y;
+		}
 		else
+		{
+			m_LastState->Buttons &= ~ovrButton_Y;
 			m_LastState->Touches &= ~ovrTouch_Y;
+		}
 		break;
 	case ovrTouch_LThumbRest:
 		if (state)
@@ -163,63 +180,27 @@ void InputManager::EmulateTouchesInputState(unsigned int touchKey, bool state, f
 		break;
 	case ovrTouch_LThumb:
 		if (state)
+		{
+			m_LastState->Buttons |= ovrButton_LThumb;
 			m_LastState->Touches |= ovrTouch_LThumb;
+		}
 		else
+		{
+			m_LastState->Buttons &= ~ovrButton_LThumb;
 			m_LastState->Touches &= ~ovrTouch_LThumb;
+		}
 		break;
 	case ovrTouch_RThumb:
 		if (state)
+		{
+			m_LastState->Buttons |= ovrButton_RThumb;
 			m_LastState->Touches |= ovrTouch_RThumb;
+		}
 		else
+		{
+			m_LastState->Buttons &= ~ovrButton_RThumb;
 			m_LastState->Touches &= ~ovrTouch_RThumb;
-		break;
-	case ovrTouch_LHandTrigger:
-		m_LastState->HandTrigger[ovrHand_Left] = value;
-		m_LastState->HandTriggerNoDeadzone[ovrHand_Left] = value;
-		m_LastState->HandTriggerRaw[ovrHand_Left] = value;
-		break;
-	case ovrTouch_RHandTrigger:
-		m_LastState->HandTrigger[ovrHand_Right] = value;
-		m_LastState->HandTriggerNoDeadzone[ovrHand_Right] = value;
-		m_LastState->HandTriggerRaw[ovrHand_Right] = value;
-		break;
-	case ovrTouch_LIndexTrigger:
-		if (state)
-		{
-			m_LastState->IndexTrigger[ovrHand_Left] = value;
-			m_LastState->IndexTriggerNoDeadzone[ovrHand_Left] = value;
-			m_LastState->IndexTriggerRaw[ovrHand_Left] = value;
-			if (value > 0.1176f)
-				m_LastState->Touches |= ovrTouch_LIndexTrigger;
-			else
-				m_LastState->Touches &= ~ovrTouch_LIndexTrigger;
 		}
-		break;
-	case ovrTouch_RIndexTrigger:
-		if (state)
-		{
-			m_LastState->IndexTrigger[ovrHand_Right] = value;
-			m_LastState->IndexTriggerNoDeadzone[ovrHand_Right] = value;
-			m_LastState->IndexTriggerRaw[ovrHand_Right] = value;
-			if (value > 0.1176f)
-				m_LastState->Touches |= ovrTouch_RIndexTrigger;
-			else
-				m_LastState->Touches &= ~ovrTouch_RIndexTrigger;
-		}
-		break;
-	case ovrTouch_LThumbstick:
-		thumbstick.x = x;
-		thumbstick.y = y;
-		m_LastState->Thumbstick[ovrHand_Left] = thumbstick;
-		m_LastState->ThumbstickNoDeadzone[ovrHand_Left] = thumbstick;
-		m_LastState->ThumbstickRaw[ovrHand_Left] = thumbstick;
-		break;
-	case ovrTouch_RThumbstick:
-		thumbstick.x = x;
-		thumbstick.y = y;
-		m_LastState->Thumbstick[ovrHand_Right] = thumbstick;
-		m_LastState->ThumbstickNoDeadzone[ovrHand_Right] = thumbstick;
-		m_LastState->ThumbstickRaw[ovrHand_Right] = thumbstick;
 		break;
 	case ovrTouch_LThumbUp:
 		if (state)
@@ -248,7 +229,74 @@ void InputManager::EmulateTouchesInputState(unsigned int touchKey, bool state, f
 	default:
 		break;
 	}
-	LogRevive("m_LastState Getinput ovrTouch_LHandTrigger when emulation: %g\n", m_LastState->HandTrigger[0]);
+	//LogRevive("m_LastState Getinput ovrTouch_LHandTrigger when emulation: %u\n", m_LastState->Touches);
+}
+
+void InputManager::EmulateTouchesInputState(unsigned int touchKey, float value)
+{
+	switch (touchKey)
+	{
+	case ovrTouch_LHandTrigger:
+		m_LastState->HandTrigger[ovrHand_Left] = value;
+		m_LastState->HandTriggerNoDeadzone[ovrHand_Left] = value;
+		m_LastState->HandTriggerRaw[ovrHand_Left] = value;
+		break;
+	case ovrTouch_RHandTrigger:
+		m_LastState->HandTrigger[ovrHand_Right] = value;
+		m_LastState->HandTriggerNoDeadzone[ovrHand_Right] = value;
+		m_LastState->HandTriggerRaw[ovrHand_Right] = value;
+		break;
+	case ovrTouch_LIndexTrigger:
+		//if (state)
+		//{
+		m_LastState->IndexTrigger[ovrHand_Left] = value;
+		m_LastState->IndexTriggerNoDeadzone[ovrHand_Left] = value;
+		m_LastState->IndexTriggerRaw[ovrHand_Left] = value;
+		if (value > REV_TRIGGER_THRESHOLD)
+			m_LastState->Touches |= ovrTouch_LIndexTrigger;
+		else
+			m_LastState->Touches &= ~ovrTouch_LIndexTrigger;
+		//}
+		break;
+	case ovrTouch_RIndexTrigger:
+		//if (state)
+		//{
+		m_LastState->IndexTrigger[ovrHand_Right] = value;
+		m_LastState->IndexTriggerNoDeadzone[ovrHand_Right] = value;
+		m_LastState->IndexTriggerRaw[ovrHand_Right] = value;
+		if (value > REV_TRIGGER_THRESHOLD)
+			m_LastState->Touches |= ovrTouch_RIndexTrigger;
+		else
+			m_LastState->Touches &= ~ovrTouch_RIndexTrigger;
+		//}
+		break;
+	default:
+		break;
+	}
+}
+
+void InputManager::EmulateTouchesInputState(unsigned int touchKey, float x, float y)
+{
+	ovrVector2f thumbstick;
+	switch (touchKey)
+	{
+	case ovrTouch_LThumbstick:
+		thumbstick.x = x;
+		thumbstick.y = y;
+		m_LastState->Thumbstick[ovrHand_Left] = thumbstick;
+		m_LastState->ThumbstickNoDeadzone[ovrHand_Left] = thumbstick;
+		m_LastState->ThumbstickRaw[ovrHand_Left] = thumbstick;
+		break;
+	case ovrTouch_RThumbstick:
+		thumbstick.x = x;
+		thumbstick.y = y;
+		m_LastState->Thumbstick[ovrHand_Right] = thumbstick;
+		m_LastState->ThumbstickNoDeadzone[ovrHand_Right] = thumbstick;
+		m_LastState->ThumbstickRaw[ovrHand_Right] = thumbstick;
+		break;
+	default:
+		break;
+	}
 }
 
 void InputManager::EmulateTouchesPositionOffset(unsigned int controllerType, float x, float y)
@@ -265,9 +313,18 @@ void InputManager::EmulateTouchesPositionOffset(unsigned int controllerType, flo
 	}
 }
 
-void InputManager::EmulateTouchesOrientationOffset(ovrControllerType controllerType, float x, float y, float z, float w)
+void InputManager::EmulateTouchesOrientationOffset(unsigned int controllerType, unsigned int axis, float radian)
 {
-	//m_EmulatedOffset.Orientation;
+	controllerType = (ovrControllerType)controllerType;
+	switch (controllerType)
+	{
+	case ovrControllerType_LTouch:
+		m_TouchL->EmulateTouchOrientationOffset(axis, radian);
+		break;
+	case ovrControllerType_RTouch:
+		m_TouchR->EmulateTouchOrientationOffset(axis, radian);
+		break;
+	}
 }
 
 ovrResult InputManager::GetInputState(ovrSession session, ovrControllerType controllerType, ovrInputState* inputState)
@@ -303,20 +360,29 @@ void InputManager::GetTrackingState(ovrSession session, ovrTrackingState* outSta
 {
 	OVR::Vector3f headPosition = outState->HeadPose.ThePose.Position;
 	OVR::Quatf orientation = outState->HeadPose.ThePose.Orientation;
-	OVR::Vector3f lOffset = m_TouchL->GetOffset(absTime).ThePose.Position;
-	OVR::Vector3f rOffset = m_TouchR->GetOffset(absTime).ThePose.Position;
-	float yaw, pitch, roll;
-	
-	orientation.GetYawPitchRoll(&yaw, &pitch, &roll);
-	OVR::Matrix4f rotationMatrix = rotationMatrix.RotationY(yaw);
-	
-	lOffset = rotationMatrix.Transform(lOffset);
-	rOffset = rotationMatrix.Transform(rOffset);
-	outState->HandPoses[0].ThePose.Position = headPosition + lOffset;
-	outState->HandPoses[1].ThePose.Position = headPosition + rOffset;
+	OVR::Vector3f lPOffset = m_TouchL->GetOffset(absTime).ThePose.Position;
+	OVR::Vector3f rPOffset = m_TouchR->GetOffset(absTime).ThePose.Position;
+	OVR::Quatf lQOffset = m_TouchL->GetOffset(absTime).ThePose.Orientation;
+	OVR::Quatf rQOffset = m_TouchR->GetOffset(absTime).ThePose.Orientation;
 
-	OVR::Quatf rotationQuat = OVR::Quat<float>(OVR::Axis_Y, yaw, OVR::Rotate_CCW, OVR::Handed_R);
-	outState->HandPoses[0].ThePose.Orientation = outState->HandPoses[1].ThePose.Orientation = rotationQuat;
+	float yaw, pitch, roll;
+	orientation.GetYawPitchRoll(&yaw, &pitch, &roll);
+
+	//OVR::Matrix4f rotationMatrix = rotationMatrix.RotationY(yaw);
+	//lPOffset = rotationMatrix.Transform(lPOffset);
+	//rPOffset = rotationMatrix.Transform(rPOffset);
+
+	lPOffset = orientation.Rotate(lPOffset);
+	rPOffset = orientation.Rotate(rPOffset);
+	outState->HandPoses[0].ThePose.Position = headPosition + lPOffset;
+	outState->HandPoses[1].ThePose.Position = headPosition + rPOffset;
+
+	//OVR::Quatf rotationQuat = OVR::Quat<float>(OVR::Axis_Y, yaw, OVR::Rotate_CCW, OVR::Handed_R);
+	//outState->HandPoses[0].ThePose.Orientation = rotationQuat * lQOffset;
+	//outState->HandPoses[1].ThePose.Orientation = rotationQuat * rQOffset;
+
+	outState->HandPoses[0].ThePose.Orientation = orientation * lQOffset;
+	outState->HandPoses[1].ThePose.Orientation = orientation * rQOffset;
 
 	outState->HandStatusFlags[0] = m_TouchL->GetStatusFlag();
 	outState->HandStatusFlags[1] = m_TouchR->GetStatusFlag();

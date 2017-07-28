@@ -65,13 +65,13 @@ InputManager::InputManager()
 	WCHAR LogPath[MAX_PATH];
 	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, LogPath)))
 	{
-		wcsncat(LogPath, L"\\Revive", MAX_PATH);
+		wcsncat(LogPath, L"\\VTouch", MAX_PATH);
 
 		BOOL exists = PathFileExists(LogPath);
 		if (!exists)
 			exists = CreateDirectory(LogPath, NULL);
 
-		wcsncat(LogPath, L"\\Revive.txt", MAX_PATH);
+		wcsncat(LogPath, L"\\VTouch.txt", MAX_PATH);
 		if (exists)
 			m_VTouchLog = _wfopen(LogPath, L"w");
 	}

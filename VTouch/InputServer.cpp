@@ -11,13 +11,13 @@ InputServer::InputServer()
 	WCHAR LogPath[MAX_PATH];
 	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, LogPath)))
 	{
-		wcsncat(LogPath, L"\\Revive", MAX_PATH);
+		wcsncat(LogPath, L"\\VTouch", MAX_PATH);
 
 		BOOL exists = PathFileExists(LogPath);
 		if (!exists)
 			exists = CreateDirectory(LogPath, NULL);
 
-		wcsncat(LogPath, L"\\ReviveServerLog.txt", MAX_PATH);
+		wcsncat(LogPath, L"\\VTouchServerLog.txt", MAX_PATH);
 		if (exists)
 			m_ServerLog = _wfopen(LogPath, L"w");
 	}
@@ -106,27 +106,17 @@ unsigned int InputServer::m_Start() {
 		return FALSE;
 	}
 
-	// Accept a client socket
-	clientSocket = accept(listenSocket, NULL, NULL);
-	if (clientSocket == INVALID_SOCKET) {
-		LogServer("accept failed with error: %d\n", WSAGetLastError());
-		closesocket(listenSocket);
-		WSACleanup();
-		return FALSE;
-	}
-	LogServer("A client connected.\n");
-
 	while (Run)
 	{
 		if (m_IsProcessing)
 			continue;
 
-		//// Accept a client socket
-		//clientSocket = accept(listenSocket, NULL, NULL);
-		//if (clientSocket == INVALID_SOCKET) {
-		//	LogServer("accept failed with error: %d\n", WSAGetLastError());
-		//}
-		//LogServer("A client connected.\n");
+		// Accept a client socket
+		clientSocket = accept(listenSocket, NULL, NULL);
+		if (clientSocket == INVALID_SOCKET) {
+			LogServer("accept failed with error: %d\n", WSAGetLastError());
+		}
+		LogServer("A client connected.\n");
 
 		iResult = recv(clientSocket, m_Recvbuf, DEFAULT_BUFLEN, 0);
 		if (iResult > 0) {
@@ -139,6 +129,11 @@ unsigned int InputServer::m_Start() {
 			}
 			//LogServer("Feedback sent: %s\n", m_Recvbuf);
 		}
+		iResult = shutdown(clientSocket, SD_SEND);
+		if (iResult == SOCKET_ERROR) {
+			LogServer("shutdown failed with error: %d\n", WSAGetLastError());
+		}
+		LogServer("A client disconnected.\n");
 	}
 
 	closesocket(listenSocket);

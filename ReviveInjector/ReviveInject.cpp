@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <Shlwapi.h>
 
-bool InjectLibRevive(HANDLE hProcess);
+bool InjectLibVTouch(HANDLE hProcess);
 bool InjectDLL(HANDLE hProcess, const char *dllPath, int dllPathLength);
 
 int CreateProcessAndInject(wchar_t *programPath) {
@@ -74,7 +74,7 @@ int CreateProcessAndInject(wchar_t *programPath) {
 	}
 #endif
 
-	if (!InjectLibRevive(pi.hProcess)) {
+	if (!InjectLibVTouch(pi.hProcess)) {
 		ResumeThread(pi.hThread);
 		return -1;
 	}
@@ -94,7 +94,7 @@ int OpenProcessAndInject(wchar_t *processId) {
 		return -1;
 	}
 
-	if (!InjectLibRevive(hProcess)) {
+	if (!InjectLibVTouch(hProcess)) {
 		return -1;
 	}
 
@@ -116,11 +116,11 @@ bool InjectDLL(HANDLE hProcess, const char *dllName) {
 	return InjectDLL(hProcess, dllPath, dllPathLength);
 }
 
-bool InjectLibRevive(HANDLE hProcess) {
+bool InjectLibVTouch(HANDLE hProcess) {
 #if _WIN64
-	return InjectDLL(hProcess, "LibRevive64_1.dll");
+	return InjectDLL(hProcess, "LibVTouch64_1.dll");
 #else
-	return InjectDLL(hProcess, "LibRevive32_1.dll");
+	return InjectDLL(hProcess, "LibVTouch32_1.dll");
 #endif
 }
 

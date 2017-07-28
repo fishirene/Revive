@@ -10,10 +10,10 @@ OculusTouch::OculusTouch(ovrControllerType role)
 	switch (role)
 	{
 	case ovrControllerType_LTouch:
-		m_HeadHandPositionOffset = { REV_DEFAULT_HEAD_HAND_OFFSET_L_X, REV_DEFAULT_HEAD_HAND_OFFSET_L_Y, REV_DEFAULT_HEAD_HAND_OFFSET_L_Z };
+		m_HeadHandPositionOffset = { VT_DEFAULT_HEAD_HAND_OFFSET_L_X, VT_DEFAULT_HEAD_HAND_OFFSET_L_Y, VT_DEFAULT_HEAD_HAND_OFFSET_L_Z };
 		break;
 	case ovrControllerType_RTouch:
-		m_HeadHandPositionOffset = { REV_DEFAULT_HEAD_HAND_OFFSET_R_X, REV_DEFAULT_HEAD_HAND_OFFSET_R_Y, REV_DEFAULT_HEAD_HAND_OFFSET_R_Z };
+		m_HeadHandPositionOffset = { VT_DEFAULT_HEAD_HAND_OFFSET_R_X, VT_DEFAULT_HEAD_HAND_OFFSET_R_Y, VT_DEFAULT_HEAD_HAND_OFFSET_R_Z };
 		break;
 	default:
 		break;
@@ -73,7 +73,7 @@ InputManager::InputManager()
 
 		wcsncat(LogPath, L"\\Revive.txt", MAX_PATH);
 		if (exists)
-			m_ReviveLog = _wfopen(LogPath, L"w");
+			m_VTouchLog = _wfopen(LogPath, L"w");
 	}
 }
 
@@ -247,28 +247,22 @@ void InputManager::EmulateTouchesInputState(unsigned int touchKey, float value)
 		m_LastState->HandTriggerRaw[ovrHand_Right] = value;
 		break;
 	case ovrTouch_LIndexTrigger:
-		//if (state)
-		//{
 		m_LastState->IndexTrigger[ovrHand_Left] = value;
 		m_LastState->IndexTriggerNoDeadzone[ovrHand_Left] = value;
 		m_LastState->IndexTriggerRaw[ovrHand_Left] = value;
-		if (value > REV_TRIGGER_THRESHOLD)
+		if (value > VT_TRIGGER_THRESHOLD)
 			m_LastState->Touches |= ovrTouch_LIndexTrigger;
 		else
 			m_LastState->Touches &= ~ovrTouch_LIndexTrigger;
-		//}
 		break;
 	case ovrTouch_RIndexTrigger:
-		//if (state)
-		//{
 		m_LastState->IndexTrigger[ovrHand_Right] = value;
 		m_LastState->IndexTriggerNoDeadzone[ovrHand_Right] = value;
 		m_LastState->IndexTriggerRaw[ovrHand_Right] = value;
-		if (value > REV_TRIGGER_THRESHOLD)
+		if (value > VT_TRIGGER_THRESHOLD)
 			m_LastState->Touches |= ovrTouch_RIndexTrigger;
 		else
 			m_LastState->Touches &= ~ovrTouch_RIndexTrigger;
-		//}
 		break;
 	default:
 		break;

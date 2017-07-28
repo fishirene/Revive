@@ -23,37 +23,37 @@
 typedef ovrTrackingState(__cdecl* _GetTrackingState)(ovrSession session, double absTime, ovrBool latencyMarker);
 extern _GetTrackingState g_TrampolineFuncAddress;
 
-//extern FILE* g_LogFileRevive;
-//#define LOG(x, ...) if (g_LogFileRevive) fprintf(g_LogFileRevive, x, __VA_ARGS__); \
-//					fflush(g_LogFileRevive);
+//extern FILE* g_LogFileVTive;
+//#define LOG(x, ...) if (g_LogFileVTouch) fprintf(g_LogFileVTouch, x, __VA_ARGS__); \
+//					fflush(g_LogFileVTouch);
 
-#define REV_PUBLIC_FUNCTION(rval) extern "C" __declspec(dllexport) rval __cdecl
+#define VT_PUBLIC_FUNCTION(rval) extern "C" __declspec(dllexport) rval __cdecl
 
-#define REV_SETTINGS_SECTION				"revive"
-#define REV_ROUND(x)						round((double)x * pow(10.0, 4)) / pow(10.0, 4);
+#define VT_SETTINGS_SECTION				"VTouch"
+#define VT_ROUND(x)						round((double)x * pow(10.0, 4)) / pow(10.0, 4);
 
-#define REV_KEY_HEAD_HAND_OFFSET_L_X		"HeadHandOffsetLX"
-#define REV_DEFAULT_HEAD_HAND_OFFSET_L_X	-0.2f
+#define VT_KEY_HEAD_HAND_OFFSET_L_X		"HeadHandOffsetLX"
+#define VT_DEFAULT_HEAD_HAND_OFFSET_L_X	-0.2f
 
-#define REV_KEY_HEAD_HAND_OFFSET_L_Y		"HeadHandOffsetLY"
-#define REV_DEFAULT_HEAD_HAND_OFFSET_L_Y	-0.3f
+#define VT_KEY_HEAD_HAND_OFFSET_L_Y		"HeadHandOffsetLY"
+#define VT_DEFAULT_HEAD_HAND_OFFSET_L_Y	-0.3f
 
-#define REV_KEY_HEAD_HAND_OFFSET_L_Z		"HeadHandOffsetLZ"
-#define REV_DEFAULT_HEAD_HAND_OFFSET_L_Z	-0.8f
+#define VT_KEY_HEAD_HAND_OFFSET_L_Z		"HeadHandOffsetLZ"
+#define VT_DEFAULT_HEAD_HAND_OFFSET_L_Z	-0.8f
 
-#define REV_KEY_HEAD_HAND_OFFSET_R_X		"HeadHandOffsetRX"
-#define REV_DEFAULT_HEAD_HAND_OFFSET_R_X	0.2f
+#define VT_KEY_HEAD_HAND_OFFSET_R_X		"HeadHandOffsetRX"
+#define VT_DEFAULT_HEAD_HAND_OFFSET_R_X	0.2f
 
-#define REV_KEY_HEAD_HAND_OFFSET_R_Y		"HeadHandOffsetRY"
-#define REV_DEFAULT_HEAD_HAND_OFFSET_R_Y	-0.3f
+#define VT_KEY_HEAD_HAND_OFFSET_R_Y		"HeadHandOffsetRY"
+#define VT_DEFAULT_HEAD_HAND_OFFSET_R_Y	-0.3f
 
-#define REV_KEY_HEAD_HAND_OFFSET_R_Z		"HeadHandOffsetRZ"
-#define REV_DEFAULT_HEAD_HAND_OFFSET_R_Z	-0.8f
+#define VT_KEY_HEAD_HAND_OFFSET_R_Z		"HeadHandOffsetRZ"
+#define VT_DEFAULT_HEAD_HAND_OFFSET_R_Z	-0.8f
 
-#define REV_KEY_IGNORE_ACTIVITYLEVEL		"IgnoreActivityLevel"
-#define REV_DEFAULT_IGNORE_ACTIVITYLEVEL	false
+#define VT_KEY_IGNORE_ACTIVITYLEVEL		"IgnoreActivityLevel"
+#define VT_DEFAULT_IGNORE_ACTIVITYLEVEL	false
 
-#define REV_TRIGGER_THRESHOLD				0.1176f
+#define VT_TRIGGER_THRESHOLD				0.1176f
 
 typedef enum ovrTouchSuppliment_ {
 	ovrTouch_LThumbstick = 0x00000080,

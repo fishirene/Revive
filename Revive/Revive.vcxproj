@@ -22,6 +22,7 @@
     <ProjectGuid>{BC34622B-5BFC-42D0-858A-331BECC048AE}</ProjectGuid>
     <RootNamespace>Revive</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <ProjectName>VTouch</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -231,7 +232,7 @@
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="InputServer.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="REV_CAPI.cpp" />
+    <ClCompile Include="VT_CAPI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\minhook\build\VC15\libMinHook.vcxproj">

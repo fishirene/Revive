@@ -1,27 +1,27 @@
 #include "Utils.h"
 #include "InputManager.h"
 
-#define REV_DEFAULT_TIMEOUT 10000
+//#define VT_DEFAULT_TIMEOUT 10000
 
 uint32_t g_MinorVersion = OVR_MINOR_VERSION;
 
 InputManager* g_InputManager = InputManager::GetInstance();
 
-bool g_DebugPrinted = FALSE;
+//bool g_DebugPrinted = FALSE;
 
-REV_PUBLIC_FUNCTION(ovrTrackingState) rev_GetTrackingState(ovrSession session, double absTime, ovrBool latencyMarker)
+VT_PUBLIC_FUNCTION(ovrTrackingState) vt_GetTrackingState(ovrSession session, double absTime, ovrBool latencyMarker)
 {
 	ovrTrackingState state = g_TrampolineFuncAddress(session, absTime, latencyMarker);
 	g_InputManager->GetTrackingState(session, &state, absTime);
 	return state;
 }
 
-REV_PUBLIC_FUNCTION(unsigned int) rev_GetConnectedControllerTypes(ovrSession session)
+VT_PUBLIC_FUNCTION(unsigned int) vt_GetConnectedControllerTypes(ovrSession session)
 {
 	return g_InputManager->GetConnectedControllerTypes();
 }
 
-REV_PUBLIC_FUNCTION(ovrResult) rev_GetInputState(ovrSession session, ovrControllerType controllerType, ovrInputState* inputState)
+VT_PUBLIC_FUNCTION(ovrResult) vt_GetInputState(ovrSession session, ovrControllerType controllerType, ovrInputState* inputState)
 {
 	if (!session)
 		return ovrError_InvalidSession;
@@ -29,7 +29,7 @@ REV_PUBLIC_FUNCTION(ovrResult) rev_GetInputState(ovrSession session, ovrControll
 	if (!inputState)
 		return ovrError_InvalidParameter;
 	
-	controllerType = (ovrControllerType)rev_GetConnectedControllerTypes(session);
+	controllerType = (ovrControllerType)vt_GetConnectedControllerTypes(session);
 	
 	ovrResult result = g_InputManager->GetInputState(session, controllerType, inputState);
 	return result;

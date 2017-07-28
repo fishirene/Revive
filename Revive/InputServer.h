@@ -28,9 +28,6 @@ private:
 
 	InputManager* g_InputManager;
 	FILE* m_ServerLog;
-
-	//SOCKET m_ClientSocket;
-	//SOCKET m_ListenSocket;
 	
 	char m_Recvbuf[DEFAULT_BUFLEN];
 	bool m_IsProcessing;

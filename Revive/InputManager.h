@@ -2,9 +2,9 @@
 
 #include "Utils.h"
 
-#define LogRevive(x, ...) if (m_ReviveLog) fprintf(m_ReviveLog, x, __VA_ARGS__); \
+#define LogVTouch(x, ...) if (m_VTouchLog) fprintf(m_ReviveLog, x, __VA_ARGS__); \
 					printf(x, __VA_ARGS__); \
-					fflush(m_ReviveLog);
+					fflush(m_VTouchLog);
 
 class OculusTouch
 {
@@ -47,7 +47,7 @@ private:
 	OculusTouch* m_TouchL;
 	OculusTouch* m_TouchR;
 	ovrInputState* m_LastState;
-	FILE* m_ReviveLog;
+	FILE* m_VTouchLog;
 };
 
 

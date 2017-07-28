@@ -8,7 +8,7 @@ typedef FARPROC(__stdcall* _GetProcAddress)(HMODULE hModule, LPCSTR lpProcName);
 _GetProcAddress TrueProcAddress;
 _GetTrackingState g_TrampolineFuncAddress;
 
-WCHAR revModuleName[MAX_PATH];
+WCHAR vtModuleName[MAX_PATH];
 WCHAR ovrModuleName[MAX_PATH];
 
 FARPROC WINAPI HookProcAddress(HMODULE hModule, LPCSTR lpProcName)
@@ -17,15 +17,15 @@ FARPROC WINAPI HookProcAddress(HMODULE hModule, LPCSTR lpProcName)
 	if (strncmp(lpProcName, "ovr_GetTrackingState", MAX_PATH) == 0)
 	{
 		std::string revProcName = lpProcName;
-		revProcName.replace(0, 3, "rev");
+		revProcName.replace(0, 3, "vt");
 		g_TrampolineFuncAddress = reinterpret_cast<_GetTrackingState>(TrueProcAddress(hModule, lpProcName));
-		return TrueProcAddress(GetModuleHandle(revModuleName), revProcName.c_str());
+		return TrueProcAddress(GetModuleHandle(vtModuleName), revProcName.c_str());
 	}
 	if (strncmp(lpProcName, "ovr_GetInputState", MAX_PATH) == 0)
 	{
 		std::string revProcName = lpProcName;
-		revProcName.replace(0, 3, "rev");
-		return TrueProcAddress(GetModuleHandle(revModuleName), revProcName.c_str());
+		revProcName.replace(0, 3, "vt");
+		return TrueProcAddress(GetModuleHandle(vtModuleName), revProcName.c_str());
 	}
 	return TrueProcAddress(hModule, lpProcName);
 }
@@ -60,7 +60,7 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserve
 	switch (ul_reason_for_call)
 	{
 		case DLL_PROCESS_ATTACH:
-			GetModuleFileName((HMODULE)hModule, revModuleName, MAX_PATH);
+			GetModuleFileName((HMODULE)hModule, vtModuleName, MAX_PATH);
 			swprintf(ovrModuleName, MAX_PATH, L"LibOVRRT%hs_%d.dll", pBitDepth, OVR_MAJOR_VERSION);
 
 			MH_Initialize();

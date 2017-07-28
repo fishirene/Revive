@@ -5,8 +5,6 @@ InputServer* InputServer::m_Instance = 0;
 InputServer::InputServer()
 	: Run(TRUE)
 	, m_IsProcessing(FALSE)
-	//, m_ClientSocket(INVALID_SOCKET)
-	//, m_listenSocket(INVALID_SOCKET)
 	, m_Recvbuf{ '0' }
 	, g_InputManager(InputManager::GetInstance())
 {

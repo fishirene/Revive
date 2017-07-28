@@ -36,7 +36,7 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\ReviveOverlay\revive.ico">
+    <Image Include="revive.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

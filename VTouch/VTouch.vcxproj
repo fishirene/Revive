@@ -20,7 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{BC34622B-5BFC-42D0-858A-331BECC048AE}</ProjectGuid>
-    <RootNamespace>Revive</RootNamespace>
+    <RootNamespace>VTouch</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
     <ProjectName>VTouch</ProjectName>
   </PropertyGroup>
@@ -82,7 +82,7 @@
     <OutDir>$(SolutionDir)$(Configuration)\$(SolutionName)\x64\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <TargetName>LibRevive64_1</TargetName>
+    <TargetName>LibVTouch64_1</TargetName>
     <OutDir>$(SolutionDir)$(Configuration)\$(SolutionName)\x64\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

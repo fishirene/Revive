@@ -1,13 +1,9 @@
 #include "Utils.h"
 #include "InputManager.h"
 
-//#define VT_DEFAULT_TIMEOUT 10000
-
 uint32_t g_MinorVersion = OVR_MINOR_VERSION;
 
 InputManager* g_InputManager = InputManager::GetInstance();
-
-//bool g_DebugPrinted = FALSE;
 
 VT_PUBLIC_FUNCTION(ovrTrackingState) vt_GetTrackingState(ovrSession session, double absTime, ovrBool latencyMarker)
 {

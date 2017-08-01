@@ -43,7 +43,15 @@ void __cdecl InputServer::StartWrapper(void* p)
 	static_cast<InputServer*>(p)->m_Start();
 }
 
+void __cdecl InputServer::m_LoopWrapper(void* p)
+{
+	static_cast<InputServer*>(p)->m_KeyboardProcess();
+}
+
 unsigned int InputServer::m_Start() {
+
+	_beginthread(&InputServer::m_LoopWrapper , 0, static_cast<void*>(m_Instance));
+
 	memset(m_Recvbuf, 0, sizeof(m_Recvbuf));
 
 	int iResult = 0;
@@ -250,3 +258,126 @@ bool InputServer::m_MessageProcess()
 	return TRUE;
 }
 
+void InputServer::m_KeyboardProcess()
+{
+	while (Run)
+	{
+		short TurnUp = GetAsyncKeyState(VK_F1) & 0x8000;
+		short TurnLeft = GetAsyncKeyState(VK_F3) & 0x8000;
+		short TurnDown = GetAsyncKeyState(VK_F2) & 0x8000;
+		short TurnRight = GetAsyncKeyState(VK_F4) & 0x8000;
+
+		short Up = GetAsyncKeyState(VK_F5) & 0x8000;
+		short Down = GetAsyncKeyState(VK_F6) & 0x8000;
+		short Left = GetAsyncKeyState(VK_F7) & 0x8000;
+		short Right = GetAsyncKeyState(VK_F8) & 0x8000;
+		short Forward = GetAsyncKeyState(VK_F9) & 0x8000;
+		short Back = GetAsyncKeyState(VK_F10) & 0x8000;
+
+		short StickUp = GetAsyncKeyState(VK_NUMPAD8) & 0x8000;
+		short StickDown = GetAsyncKeyState(VK_NUMPAD5) & 0x8000;
+		short StickLeft = GetAsyncKeyState(VK_NUMPAD4) & 0x8000;
+		short StickRight = GetAsyncKeyState(VK_NUMPAD6) & 0x8000;
+
+		short AX = GetAsyncKeyState(VK_NUMPAD2) & 0x8000;
+		short BY = GetAsyncKeyState(VK_NUMPAD3) & 0x8000;
+		short IndexTigger = GetAsyncKeyState(VK_NUMPAD1) & 0x8000;
+		short HandTrigger = GetAsyncKeyState(VK_NUMPAD0) & 0x8000;
+
+		if (TurnUp && !TurnDown)
+			g_InputManager->EmulateHeadOrientationOffset(OVR::Axis_X, VT_HEAD_ROTATE_SPEED);
+		else if (TurnDown && !TurnUp)
+			g_InputManager->EmulateHeadOrientationOffset(OVR::Axis_X, -VT_HEAD_ROTATE_SPEED);
+		if (TurnLeft && !TurnRight)
+			g_InputManager->EmulateHeadOrientationOffset(OVR::Axis_Y, VT_HEAD_ROTATE_SPEED);
+		else if (TurnRight && !TurnLeft)
+			g_InputManager->EmulateHeadOrientationOffset(OVR::Axis_Y, -VT_HEAD_ROTATE_SPEED);
+
+		if (Up && !Down)
+			g_InputManager->EmulateHeadPositionOffset(0, VT_HEAD_MOVE_SPEED, 0);
+		else if (Down && !Up)
+			g_InputManager->EmulateHeadPositionOffset(0, -VT_HEAD_MOVE_SPEED, 0);
+		if (Left && !Right)
+			g_InputManager->EmulateHeadPositionOffset(-VT_HEAD_MOVE_SPEED, 0, 0);
+		else if (Right && !Left)
+			g_InputManager->EmulateHeadPositionOffset(VT_HEAD_MOVE_SPEED, 0, 0);
+		if (Forward && !Back)
+			g_InputManager->EmulateHeadPositionOffset(0, 0, -VT_HEAD_MOVE_SPEED);
+		else if (Back && !Forward)
+			g_InputManager->EmulateHeadPositionOffset(0, 0, VT_HEAD_MOVE_SPEED);
+
+		if (StickUp && !StickDown)
+		{
+			g_InputManager->EmulateTouchesInputState(ovrTouch_LThumbstick, 0, 0.9f);
+			g_InputManager->EmulateTouchesInputState(ovrTouch_RThumbstick, 0, 0.9f);
+		}	
+		else if (StickDown && !StickUp)
+		{
+			g_InputManager->EmulateTouchesInputState(ovrTouch_LThumbstick, 0, -0.9f);
+			g_InputManager->EmulateTouchesInputState(ovrTouch_RThumbstick, 0, -0.9f);
+		}
+		else if (!StickUp || !StickDown)
+		{
+			g_InputManager->EmulateTouchesInputState(ovrTouch_LThumbstick, 0, 0);
+			g_InputManager->EmulateTouchesInputState(ovrTouch_RThumbstick, 0, 0);
+		}
+
+		if (StickLeft && !StickRight)
+		{
+			g_InputManager->EmulateTouchesInputState(ovrTouch_LThumbstick, 0.9f, 0);
+			g_InputManager->EmulateTouchesInputState(ovrTouch_RThumbstick, 0.9f, 0);
+		}
+		else if (StickRight && !StickLeft)
+		{
+			g_InputManager->EmulateTouchesInputState(ovrTouch_LThumbstick, -0.9f, 0);
+			g_InputManager->EmulateTouchesInputState(ovrTouch_RThumbstick, -0.9f, 0);
+		}
+		else if (!StickLeft || !StickRight)
+		{
+			g_InputManager->EmulateTouchesInputState(ovrTouch_LThumbstick, 0, 0);
+			g_InputManager->EmulateTouchesInputState(ovrTouch_RThumbstick, 0, 0);
+		}
+		
+		if (AX)
+		{
+			g_InputManager->EmulateTouchesInputState(ovrTouch_A, (bool)1);
+			g_InputManager->EmulateTouchesInputState(ovrTouch_X, (bool)1);
+		}
+		else
+		{
+			g_InputManager->EmulateTouchesInputState(ovrTouch_A, (bool)0);
+			g_InputManager->EmulateTouchesInputState(ovrTouch_X, (bool)0);
+		}
+		if (BY)
+		{
+			g_InputManager->EmulateTouchesInputState(ovrTouch_B, (bool)1);
+			g_InputManager->EmulateTouchesInputState(ovrTouch_Y, (bool)1);
+		}
+		else
+		{
+			g_InputManager->EmulateTouchesInputState(ovrTouch_B, (bool)0);
+			g_InputManager->EmulateTouchesInputState(ovrTouch_Y, (bool)0);
+		}
+		if (IndexTigger)
+		{
+			g_InputManager->EmulateTouchesInputState(ovrTouch_LIndexTrigger, 0.9f);
+			g_InputManager->EmulateTouchesInputState(ovrTouch_RIndexTrigger, 0.9f);
+		}
+		else
+		{
+			g_InputManager->EmulateTouchesInputState(ovrTouch_LIndexTrigger, 0.1f);
+			g_InputManager->EmulateTouchesInputState(ovrTouch_RIndexTrigger, 0.1f);
+		}
+		if (HandTrigger)
+		{
+			g_InputManager->EmulateTouchesInputState(ovrTouch_LHandTrigger, 0.9f);
+			g_InputManager->EmulateTouchesInputState(ovrTouch_RHandTrigger, 0.9f);
+		}
+		else
+		{
+			g_InputManager->EmulateTouchesInputState(ovrTouch_LHandTrigger, 0.1f);
+			g_InputManager->EmulateTouchesInputState(ovrTouch_RHandTrigger, 0.1f);
+		}
+	}
+	_endthread();
+}

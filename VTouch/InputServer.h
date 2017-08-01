@@ -21,6 +21,7 @@ public:
 	bool Run;
 
 	static void __cdecl StartWrapper(void* p);
+	
 
 private:
 	InputServer();
@@ -34,5 +35,8 @@ private:
 
 	unsigned int m_Start();
 
+	static void __cdecl m_LoopWrapper(void* p);
+
 	bool m_MessageProcess();
+	void m_KeyboardProcess();
 };

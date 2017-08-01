@@ -2,7 +2,7 @@
 
 #include "Utils.h"
 
-#define LogVTouch(x, ...) if (m_VTouchLog) fprintf(m_ReviveLog, x, __VA_ARGS__); \
+#define LogVTouch(x, ...) if (m_VTouchLog) fprintf(m_VTouchLog, x, __VA_ARGS__); \
 					printf(x, __VA_ARGS__); \
 					fflush(m_VTouchLog);
 
@@ -36,6 +36,8 @@ public:
 	ovrResult GetDevicePoses(ovrTrackedDeviceType* deviceTypes, int deviceCount, double absTime, ovrPoseStatef* outDevicePoses);
 	void EmulateTouchesPositionOffset(unsigned int controllerType, float x, float y);
 	void EmulateTouchesOrientationOffset(unsigned int controllerType, unsigned int axis, float radian);
+	void EmulateHeadPositionOffset(float x, float y, float z);
+	void EmulateHeadOrientationOffset(unsigned int axis, float degree);
 	void EmulateTouchesInputState(unsigned int touchKey, bool state);
 	void EmulateTouchesInputState(unsigned int touchKey, float value);
 	void EmulateTouchesInputState(unsigned int touchKey, float x, float y);
@@ -47,6 +49,7 @@ private:
 	OculusTouch* m_TouchL;
 	OculusTouch* m_TouchR;
 	ovrInputState* m_LastState;
+	ovrPoseStatef* m_LastOffset;
 	FILE* m_VTouchLog;
 };
 

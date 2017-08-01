@@ -59,8 +59,10 @@ InputManager::InputManager()
 	: m_TouchL(new OculusTouch(ovrControllerType_LTouch))
 	, m_TouchR(new OculusTouch(ovrControllerType_RTouch))
 	, m_LastState(new ovrInputState())
+	, m_LastOffset(new ovrPoseStatef())
 {
 	m_LastState->ControllerType = (ovrControllerType)GetConnectedControllerTypes();
+	*m_LastOffset = { OVR::Posef::Identity() };
 
 	WCHAR LogPath[MAX_PATH];
 	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, LogPath)))
@@ -83,6 +85,7 @@ InputManager::~InputManager()
 	delete m_TouchL;
 	delete m_TouchR;
 	delete m_LastState;
+	delete m_LastOffset;
 }
 
 InputManager* InputManager::GetInstance() {
@@ -112,6 +115,8 @@ void InputManager::EmulateResetTouchesPose()
 	m_TouchR = new OculusTouch(ovrControllerType_RTouch);
 	m_LastState = new ovrInputState();
 	m_LastState->ControllerType = (ovrControllerType)GetConnectedControllerTypes();
+	m_LastOffset = new ovrPoseStatef();
+	*m_LastOffset = { OVR::Posef::Identity() };
 }
 
 void InputManager::EmulateTouchesInputState(unsigned int touchKey, bool state)
@@ -321,6 +326,23 @@ void InputManager::EmulateTouchesOrientationOffset(unsigned int controllerType, 
 	}
 }
 
+void InputManager::EmulateHeadPositionOffset(float x, float y, float z)
+{
+	OVR::Vector3f tmpOffset(x, y, z);
+	OVR::Vector3f offset = m_LastOffset->ThePose.Position;
+	offset += tmpOffset;
+	m_LastOffset->ThePose.Position = offset;
+}
+
+void InputManager::EmulateHeadOrientationOffset(unsigned int axis, float degree)
+{
+	float radian = OVR::DegreeToRad(degree);
+	OVR::Quatf tmpOffset = OVR::Quat<float>((OVR::Axis)axis, radian, OVR::Rotate_CCW, OVR::Handed_R);
+	OVR::Quatf offset = m_LastOffset->ThePose.Orientation;
+	offset *= tmpOffset;
+	m_LastOffset->ThePose.Orientation = offset;
+}
+
 ovrResult InputManager::GetInputState(ovrSession session, ovrControllerType controllerType, ovrInputState* inputState)
 {
 	//LogRevive("m_LastState Getinput ovrTouch_LHandTrigger: %g\n", m_LastState->HandTrigger[0]);
@@ -352,22 +374,29 @@ ovrResult InputManager::GetInputState(ovrSession session, ovrControllerType cont
 
 void InputManager::GetTrackingState(ovrSession session, ovrTrackingState* outState, double absTime)
 {
+	OVR::Quatf qOffset = m_LastOffset->ThePose.Orientation;
+	OVR::Vector3f pOffset = m_LastOffset->ThePose.Position;
+
 	OVR::Vector3f headPosition = outState->HeadPose.ThePose.Position;
-	OVR::Quatf orientation = outState->HeadPose.ThePose.Orientation;
+	OVR::Quatf headOrientation = outState->HeadPose.ThePose.Orientation;
+
+	headOrientation *= qOffset;
+	headPosition += pOffset;
+
 	OVR::Vector3f lPOffset = m_TouchL->GetOffset(absTime).ThePose.Position;
 	OVR::Vector3f rPOffset = m_TouchR->GetOffset(absTime).ThePose.Position;
 	OVR::Quatf lQOffset = m_TouchL->GetOffset(absTime).ThePose.Orientation;
 	OVR::Quatf rQOffset = m_TouchR->GetOffset(absTime).ThePose.Orientation;
 
 	float yaw, pitch, roll;
-	orientation.GetYawPitchRoll(&yaw, &pitch, &roll);
+	headOrientation.GetYawPitchRoll(&yaw, &pitch, &roll);
 
 	//OVR::Matrix4f rotationMatrix = rotationMatrix.RotationY(yaw);
 	//lPOffset = rotationMatrix.Transform(lPOffset);
 	//rPOffset = rotationMatrix.Transform(rPOffset);
 
-	lPOffset = orientation.Rotate(lPOffset);
-	rPOffset = orientation.Rotate(rPOffset);
+	lPOffset = headOrientation.Rotate(lPOffset);
+	rPOffset = headOrientation.Rotate(rPOffset);
 	outState->HandPoses[0].ThePose.Position = headPosition + lPOffset;
 	outState->HandPoses[1].ThePose.Position = headPosition + rPOffset;
 
@@ -375,11 +404,15 @@ void InputManager::GetTrackingState(ovrSession session, ovrTrackingState* outSta
 	//outState->HandPoses[0].ThePose.Orientation = rotationQuat * lQOffset;
 	//outState->HandPoses[1].ThePose.Orientation = rotationQuat * rQOffset;
 
-	outState->HandPoses[0].ThePose.Orientation = orientation * lQOffset;
-	outState->HandPoses[1].ThePose.Orientation = orientation * rQOffset;
+	outState->HandPoses[0].ThePose.Orientation = headOrientation * lQOffset;
+	outState->HandPoses[1].ThePose.Orientation = headOrientation * rQOffset;
+
+	outState->HeadPose.ThePose.Orientation = headOrientation;
+	outState->HeadPose.ThePose.Position = headPosition;
 
 	outState->HandStatusFlags[0] = m_TouchL->GetStatusFlag();
 	outState->HandStatusFlags[1] = m_TouchR->GetStatusFlag();
+	//LogVTouch("Head offset position: %g, %g, %g\n", m_LastOffset->ThePose.Position.x, m_LastOffset->ThePose.Position.y, m_LastOffset->ThePose.Position.z);
 }
 
 ovrResult InputManager::GetDevicePoses(ovrTrackedDeviceType* deviceTypes, int deviceCount, double absTime, ovrPoseStatef* outDevicePoses)

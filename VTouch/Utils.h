@@ -53,7 +53,11 @@ extern _GetTrackingState g_TrampolineFuncAddress;
 #define VT_KEY_IGNORE_ACTIVITYLEVEL		"IgnoreActivityLevel"
 #define VT_DEFAULT_IGNORE_ACTIVITYLEVEL	false
 
-#define VT_TRIGGER_THRESHOLD				0.1176f
+#define VT_TRIGGER_THRESHOLD			0.1176f
+
+#define VT_HEAD_MOVE_SPEED				8e-7f
+
+#define VT_HEAD_ROTATE_SPEED			5e-5f
 
 typedef enum ovrTouchSuppliment_ {
 	ovrTouch_LThumbstick = 0x00000080,
